@@ -1,0 +1,104 @@
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100vw;
+  min-height: 100vh;
+
+  /* overlay */
+  background: color-mix(in srgb, var(--app-bg) 45%, transparent);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal {
+  background: var(--panel);
+  min-width: 200px;
+  border-radius: 12px;
+  box-shadow: 0 10px 28px var(--shadow);
+  border: 1px solid var(--border);
+  min-height: 16px;
+  overflow: hidden; /* header border aligns */
+}
+
+/* Header */
+.modal h3 {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  padding: 10px 14px;
+
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+/* Content padding for input & buttons */
+.modal .content-container {
+  padding: 0 8px 8px 8px;
+}
+
+.modal .body {
+  padding: 12px;
+  color: var(--text-2);
+}
+
+/* Input styling */
+.modal input {
+  width: 100%;
+  padding: 8px;
+
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+
+  color: var(--text);
+
+  display: block;
+  box-sizing: border-box;
+}
+
+.modal input::placeholder {
+  color: var(--muted);
+}
+
+/* Button container */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Default button = neutral */
+.actions button {
+  background: var(--btn-grad-left);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 70px;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+}
+
+.actions button:hover {
+  background: var(--btn-grad-hover-left);
+  border-color: var(--border-2);
+}
+
+.actions button:active {
+  transform: translateY(1px);
+}
+
+.actions button.danger {
+  background: color-mix(in srgb, var(--danger) 14%, var(--panel));
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  color: var(--text);
+}
+
+.actions button.danger:hover {
+  background: color-mix(in srgb, var(--danger) 20%, var(--panel));
+}

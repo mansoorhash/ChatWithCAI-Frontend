@@ -1,0 +1,114 @@
+/* =========================
+   HEADER
+========================= */
+
+.app-header {
+  position:absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+
+  display: flex;
+  justify-content: center;
+  z-index: 2;
+  border: none;
+
+  background: transparent;
+}
+
+.app-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.3),
+    transparent
+  );
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  pointer-events: none;
+  z-index: -10;
+}
+
+/* inner container (fixes alignment issue) */
+.header-inner {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 26px 0 20px; /* extra 6px on right for scrollbar */
+}
+
+/* =========================
+   LEFT
+========================= */
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap:10px;
+  text-decoration: none;
+}
+
+/* Logo */
+.logo-text {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    #60A5FA
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  cursor: pointer;
+}
+
+.logo-img {
+  width: 75px;
+  height: auto;
+  cursor: pointer;
+}
+
+
+/* =========================
+   RIGHT
+========================= */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.header-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+
+  border: 1px solid var(--border);
+  background: var(--panel);
+  
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 500;
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.header-btn:hover {
+  background: var(--hover);
+}

@@ -1,0 +1,187 @@
+/* Change Tier (cool neutral accent) */
+.upgrade{
+  background: var(--upgrade);
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* End Subscription (danger tone, soft red) */
+.btn-end {
+  background: rgba(255, 60, 60, 0.28);
+  color: #ff5a5a;
+}
+
+.btn-end:hover {
+  background: rgba(255, 60, 60, 0.35);
+  color: #ff7878;
+}
+.model-summary{
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.model-summary-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--item-bg);
+  border: 1px solid var(--border);
+  
+}
+
+.model-summary-row.locked{
+  opacity: 0.8;
+}
+
+.label{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.value{
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+
+.rightpack{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chev{
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.chev:hover{
+  background: var(--hover);
+}
+
+.pill-panel{
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03); /* works in dark; harmless in light */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill{
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--item-bg);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.pill-locked{
+  opacity: 0.75;
+}
+
+.right .date {
+  color: var(--text);
+}
+
+@media (max-width: 768px) {
+  .subscription-settings .model-summary,
+  .subscription-settings .model-section {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .subscription-settings .model-summary-row {
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+    padding: 9px 10px;
+    box-sizing: border-box;
+  }
+
+  .subscription-settings .model-summary-row .label {
+    min-width: 0;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .subscription-settings .model-summary-row .rightpack {
+    flex: 0 0 auto;
+  }
+
+  .subscription-settings .model-summary-row .value {
+    width: auto;
+    min-width: 20px;
+    white-space: nowrap;
+    text-align: right;
+    word-break: normal;
+  }
+
+  .subscription-settings .pill-panel {
+    width: 100%;
+    max-height: 140px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .subscription-settings .renewal-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center;
+    column-gap: 10px;
+  }
+
+  .subscription-settings .renewal-row > .left {
+    width: auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .subscription-settings .renewal-row .title,
+  .subscription-settings .renewal-row .subline {
+    white-space: nowrap;
+  }
+
+  .subscription-settings .renewal-row .subline {
+    font-size: clamp(10px, 2.9vw, 13px);
+  }
+
+  .subscription-settings .renewal-row > .right {
+    width: auto;
+    max-width: none;
+    min-width: max-content;
+    margin: 0;
+  }
+
+  .subscription-settings .renewal-row .date {
+    white-space: nowrap;
+    font-size: clamp(13px, 3.7vw, 16px);
+  }
+
+  .subscription-settings .sub-footer .sub-actions button {
+    padding: 9px 12px;
+  }
+}

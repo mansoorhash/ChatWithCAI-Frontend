@@ -1,0 +1,131 @@
+.public-info-page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 64px 48px 88px;
+  color: var(--text);
+}
+
+.public-info-hero {
+  max-width: 760px;
+  margin-bottom: 48px;
+}
+
+.public-info-eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.public-info-title {
+  max-width: 780px;
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2.35rem, 6vw, 4.6rem);
+  font-weight: 760;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.public-info-lead {
+  max-width: 680px;
+  margin: 22px 0 0;
+  color: var(--text-2);
+  font-size: clamp(1rem, 2vw, 1.16rem);
+  line-height: 1.7;
+}
+
+.public-info-section {
+  margin-top: 72px;
+}
+
+.public-info-section-heading {
+  max-width: 720px;
+  margin-bottom: 28px;
+}
+
+.public-info-section-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
+  letter-spacing: -0.035em;
+}
+
+.public-info-section-heading p {
+  margin: 10px 0 0;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+.public-info-panel {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--panel);
+}
+
+.public-info-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid var(--input-border);
+  border-radius: 11px;
+  color: var(--text);
+  background: var(--panel-2);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.public-info-button:hover {
+  border-color: var(--border-2, var(--input-border));
+  background: var(--panel-3, var(--active));
+  transform: translateY(-1px);
+}
+
+.public-info-button.primary {
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--accent);
+}
+
+.public-info-button.primary:hover {
+  border-color: var(--upgrade-hover);
+  background: var(--upgrade-hover);
+}
+
+.public-info-button:focus-visible,
+.public-info-page button:focus-visible,
+.public-info-page a:focus-visible,
+.public-info-page input:focus-visible,
+.public-info-page select:focus-visible,
+.public-info-page textarea:focus-visible,
+.public-info-page summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .public-info-page {
+    padding: 44px 22px 64px;
+  }
+
+  .public-info-hero {
+    margin-bottom: 36px;
+  }
+
+  .public-info-section {
+    margin-top: 56px;
+  }
+}
+
+@media (max-width: 420px) {
+  .public-info-page {
+    padding-inline: 16px;
+  }
+}

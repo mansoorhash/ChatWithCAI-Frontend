@@ -1,0 +1,91 @@
+.chat-model-training {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  color: var(--text);
+}
+
+.chat-model-training__text {
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.chat-model-training__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chat-model-training__button {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-model-training__enable {
+  color: var(--text);
+  background: var(--input-bg-1);
+  border-color: var(--inverse-bg);
+}
+
+.chat-model-training__enable:hover {
+  background: var(--item-bg-hover);
+}
+
+.chat-model-training__disable {
+  color: var(--text);
+  background: transparent;
+}
+
+.chat-model-training__disable:hover {
+  background: var(--hover);
+}
+
+.chat-model-training__link {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.chat-model-training__link:hover {
+  color: var(--text-2);
+}
+
+.chat-model-training__text .chat-model-training__link,
+.chat-model-training__text .chat-model-training__link:visited {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .chat-model-training {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chat-model-training__text {
+    width: auto;
+  }
+
+  .chat-model-training__actions {
+    flex-shrink: 0;
+  }
+}

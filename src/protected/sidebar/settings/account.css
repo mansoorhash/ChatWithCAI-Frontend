@@ -1,0 +1,86 @@
+
+.value-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-value {
+  color: var(--inverse-bg);
+  text-align: right;
+  width: 100%;
+  word-break: break-all;
+  font-size: 15px;
+}
+
+.edit-icon {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  opacity: 0;
+  cursor: pointer;
+  color: var(--inverse-bg);
+  border: 1px solid transparent;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.row:hover .edit-icon {
+  border-color: var(--inverse-bg);
+  opacity: 1; /* appears on hover */
+}
+
+.edit-icon:hover {
+  color: var(--inverse-bg-hover);
+}
+
+.account-settings .modal {
+  min-width: 275px;
+}
+
+@media (max-width: 768px) {
+  .sub-content {
+    gap: 10px
+  }
+
+  .account-settings .sub-content > .row {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .account-settings .value-wrap {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    justify-content: flex-end;
+  }
+
+  .account-settings .value-wrap .value {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    overflow: visible;
+    white-space: nowrap;
+    text-overflow: clip;
+    word-break: normal;
+    text-align: right;
+    font-size: clamp(11px, 3.2vw, 14px);
+  }
+
+  .account-settings .edit-icon {
+    flex: 0 0 auto;
+  }
+
+  .account-settings .delete-button {
+    padding: 9px 12px;
+  }
+
+  .row .edit-icon {
+    border-color: var(--inverse-bg);
+    opacity: 1; /* appears on hover */
+  }
+
+}

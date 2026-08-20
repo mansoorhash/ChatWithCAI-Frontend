@@ -1,0 +1,200 @@
+/* =========================
+   AI Blocks (blocks_v1)
+   ========================= */
+
+/* Base AI bubble */
+.chat-msg.ai {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 18px var(--shadow);
+  margin: 6px 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Headings */
+.chat-msg.ai .ai-h2 {
+  margin: 8px 0 2px;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.chat-msg.ai .ai-h3 {
+  margin: 6px 0 2px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Paragraphs */
+.chat-msg.ai .ai-p {
+  margin: 2px 0 5px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+/* Bullet lists */
+.chat-msg.ai .ai-bullets {
+  margin: 3px 0 7px;
+  padding-left: 24px;
+
+  color: var(--text-2);
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+.chat-msg.ai .ai-bullets li {
+  margin: 2px 0;
+  padding-left: 2px;
+  line-height: 1.45;
+}
+
+.chat-msg.ai .ai-bullets li::marker {
+  color: var(--text-2);
+}
+
+/* Links */
+.chat-msg.ai a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.chat-msg.ai a:hover {
+  opacity: 0.85;
+}
+
+/* Code block */
+.chat-msg.ai .ai-code {
+  width: 100%;
+  margin: 7px 0;
+  padding: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  background: var(--code-bg);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  color: var(--text);
+}
+
+.chat-msg.ai .code-header {
+  width: 100%;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  padding: 5px 7px;
+  box-sizing: border-box;
+
+  border-bottom: 1px solid var(--border-2);
+}
+
+.chat-msg.ai .code-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.chat-msg.ai .ai-code > code {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 10px 12px;
+  overflow-x: auto;
+  color: inherit;
+  background: transparent;
+  border-radius: 0;
+
+  font-size: 13px;
+  line-height: 1.5;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  white-space: pre;
+}
+
+/* Inline code rendered inside regular text */
+.chat-msg.ai :not(pre) > code {
+  padding: 2px 5px;
+
+  background: var(--code-bg);
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+
+  font-size: 0.92em;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+}
+
+/* Remove extra spacing at bubble edges */
+.chat-msg.ai > :first-child {
+  margin-top: 0;
+}
+
+.chat-msg.ai > :last-child {
+  margin-bottom: 0;
+}
+
+/* Plain message text */
+.message-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Processing animation */
+.processing-status {
+  font-style: italic;
+  font-weight: 500;
+
+  color: transparent;
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    var(--muted) 38%,
+    var(--text) 47%,
+    var(--text) 53%,
+    var(--muted) 62%,
+    var(--muted) 100%
+  );
+
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  animation: moving-text-glow 3s linear infinite;
+}
+
+@keyframes moving-text-glow {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -150% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processing-status {
+    animation: none;
+    color: var(--muted);
+    background: none;
+  }
+}

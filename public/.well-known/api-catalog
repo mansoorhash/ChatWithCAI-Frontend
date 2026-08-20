@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://api.chatwithcai.com/",
+      "service-desc": [
+        {
+          "href": "https://api.chatwithcai.com/openapi.json",
+          "type": "application/json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://api.chatwithcai.com/docs",
+          "type": "text/html"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://api.chatwithcai.com/healthz",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

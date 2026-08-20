@@ -1,0 +1,51 @@
+/* Base chat message bubble */
+.chat-msg {
+  width: 90%;
+  max-width: 90%;
+  min-width: 0;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.chat-msg.error {
+  color: var(--danger);
+  border-color: var(--danger);
+  background-color: var(--error-bg);
+}
+
+/* User bubble */
+.chat-msg.user {
+  background-color: var(--user-bubble);
+  color: var(--user-text);
+  align-self: flex-end;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.chat-msg.user.editing-target {
+  outline: 2px solid var(--accent);
+}
+
+/* AI layout only */
+.chat-msg.ai {
+  align-self: flex-start;
+  text-align: left;
+}
+
+/* Branch selector row */
+.branch-row {
+  display: flex;
+}
+
+.branch-count {
+  min-width: 36px;
+  text-align: center;
+  letter-spacing: 0.3px;
+  color: var(--text-2);
+}

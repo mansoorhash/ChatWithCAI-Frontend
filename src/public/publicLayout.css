@@ -1,0 +1,24 @@
+.public {
+  position: relative;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.content {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+.content--home {
+  padding-top: 0;
+}
+
+.content--inner {
+  padding-top: 32px; /* header height */
+}
+
+.content > :first-child {
+  min-height: calc(100dvh - 80px);
+}

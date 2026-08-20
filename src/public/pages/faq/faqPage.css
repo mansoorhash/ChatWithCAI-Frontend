@@ -1,0 +1,134 @@
+@import '../shared/publicPage.css';
+
+.faq-groups {
+  display: grid;
+  gap: 64px;
+}
+
+.faq-group {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 42px;
+}
+
+.faq-group > h2 {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 1.08rem;
+  letter-spacing: -0.02em;
+}
+
+.faq-list {
+  border-top: 1px solid var(--border);
+}
+
+.faq-list details {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-list summary {
+  display: flex;
+  min-height: 68px;
+  cursor: pointer;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text);
+  font-weight: 680;
+  list-style: none;
+}
+
+.faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-list summary:hover {
+  color: var(--accent);
+}
+
+.faq-plus {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.faq-plus::before,
+.faq-plus::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+  content: '';
+  transform: translate(-50%, -50%);
+  transition: transform 160ms ease;
+}
+
+.faq-plus::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.faq-list details[open] .faq-plus::after {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.faq-list details > p {
+  max-width: 720px;
+  margin: -2px 42px 22px 0;
+  color: var(--text-2);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.faq-contact-cta {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 76px;
+  padding: 28px 30px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+}
+
+.faq-contact-cta h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.2rem;
+}
+
+.faq-contact-cta p {
+  margin: 7px 0 0;
+  color: var(--text-2);
+  font-size: 0.9rem;
+}
+
+.faq-contact-cta .public-info-button {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 760px) {
+  .faq-group {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .faq-contact-cta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .faq-contact-cta {
+    padding: 22px;
+  }
+
+  .faq-contact-cta .public-info-button {
+    width: 100%;
+  }
+}

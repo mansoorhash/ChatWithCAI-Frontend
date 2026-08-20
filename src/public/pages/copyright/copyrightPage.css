@@ -1,0 +1,242 @@
+.copyright-page {
+  color: var(--text);
+  background:
+    radial-gradient(circle at 50% -12%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 34rem),
+    var(--app-bg);
+}
+
+.copyright-shell {
+  width: min(880px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0 32px;
+}
+
+.copyright-hero {
+  padding: 12px 8px 32px;
+}
+
+.copyright-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 44px;
+  padding: 8px 12px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.copyright-back-link:hover {
+  color: var(--text);
+  background: var(--panel-2);
+  border-color: var(--border-2);
+  transform: translateY(-1px);
+}
+
+.copyright-eyebrow {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.copyright-hero h1 {
+  max-width: 720px;
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(34px, 6vw, 56px);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.copyright-intro {
+  max-width: 670px;
+  margin: 20px 0 0;
+  color: var(--text-2);
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.copyright-updated {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.copyright-document {
+  overflow: hidden;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 18px 55px var(--shadow);
+}
+
+.copyright-document section {
+  padding: 30px 34px;
+  border-bottom: 1px solid var(--border);
+}
+
+.copyright-document section:last-child {
+  border-bottom: 0;
+}
+
+.copyright-document h2 {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+.copyright-document p,
+.copyright-document li {
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.copyright-document p {
+  margin: 0 0 14px;
+}
+
+.copyright-document p:last-child {
+  margin-bottom: 0;
+}
+
+.copyright-document ul,
+.copyright-document ol {
+  margin: 12px 0 16px;
+  padding-left: 23px;
+}
+
+.copyright-document li {
+  padding-left: 5px;
+  margin-bottom: 8px;
+}
+
+.copyright-document li::marker {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.copyright-document strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.copyright-contact-card {
+  margin: 22px 0;
+  padding: 20px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.copyright-contact-card .copyright-contact-label {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.copyright-email-link {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-size: 17px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  text-underline-offset: 3px;
+}
+
+.copyright-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 8px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.copyright-footer p {
+  margin: 0;
+}
+
+.copyright-footer nav {
+  display: flex;
+  gap: 18px;
+}
+
+.copyright-footer a {
+  color: var(--text-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.copyright-footer a:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.copyright-page a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 36%, transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .copyright-shell {
+    width: min(100% - 20px, 880px);
+    padding-top: 18px;
+  }
+
+  .copyright-hero {
+    padding: 8px 6px 24px;
+  }
+
+  .copyright-back-link {
+    margin-bottom: 34px;
+  }
+
+  .copyright-intro {
+    font-size: 16px;
+  }
+
+  .copyright-document {
+    border-radius: 16px;
+  }
+
+  .copyright-document section {
+    padding: 24px 20px;
+  }
+
+  .copyright-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copyright-back-link {
+    transition: none;
+  }
+}

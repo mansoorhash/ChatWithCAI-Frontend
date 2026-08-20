@@ -1,0 +1,13 @@
+const ENABLED_KEY = '9c70a0cd-4635-4f46-88df-fa18fb3cd265';
+const LOCKED_KEY = '5488bfa2-d17a-47b5-b786-7a5f32e4aef5';
+const USAGE_KEY = '1e6b1d98-573b-4c9f-8696-adfee02ef604';
+const CHAT_TOTALCOUNT = 'f52b3ed8-e172-45c6-9862-dd6766d634f0';
+const CHAT_EXPIRATION = '16fda099-75d8-426e-ba37-515ed221004d';
+
+export { 
+    ENABLED_KEY, 
+    LOCKED_KEY,
+    USAGE_KEY,
+    CHAT_TOTALCOUNT,
+    CHAT_EXPIRATION
+}

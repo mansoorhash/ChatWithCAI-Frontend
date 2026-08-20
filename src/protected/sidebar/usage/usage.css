@@ -1,0 +1,269 @@
+.usage-container {
+  display: flex;
+  flex-direction: column;
+  width: 860px;
+  height: 500px;
+}
+
+/* ================= Header ================= */
+.usage-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  height: 52px;
+  padding: 0 10px;
+  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+
+.usage-title {
+  margin: 0;
+  justify-self: center;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+
+.usage-header-spacer {
+  width: 40px;
+  height: 32px;
+}
+
+/* ================= Close Button ================= */
+.usage-close {
+  justify-self: start;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 32px;
+  text-align: center;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.1s;
+}
+
+.usage-close:hover {
+  background: var(--hover);
+  color: var(--danger);
+  transform: scale(1.05);
+}
+
+.usage-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--border-2);
+}
+
+/* ================= Subheader ================= */
+.usage-subheader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 12px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* ================= Year Selector ================= */
+.usage-year-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+
+.usage-year-label {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.usage-year-select {
+  appearance: none;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--input-border);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.usage-year-select:hover {
+  background: var(--hover);
+}
+
+/* ================= Year Summary ================= */
+.usage-year-summary {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  align-items: center;
+  column-gap: 16px;
+  min-height: 36px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.usage-year-summary-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.usage-year-hits,
+.usage-winning-months {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+/* ================= Months Grid ================= */
+.usage-months-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(112px, auto));
+  gap: 12px;
+  padding: 12px;
+}
+
+/* ================= Month Cell ================= */
+.usage-month-cell {
+  background: var(--item-bg);
+  border: 1px solid var(--item-border);
+  border-radius: 12px;
+  padding: 12px 10px 18px;
+  color: var(--text-2);
+  height: auto;
+  min-width: 0;
+  font-size: 12px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.usage-month-cell:hover {
+  background: var(--item-bg-hover);
+  border-color: var(--item-bg-border-hover);
+}
+
+/* ================= Month Content ================= */
+.usage-month-name {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.usage-month-top3 {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.usage-month-top3 li {
+  display: grid;
+  grid-template-columns: 22px auto 1fr;
+  align-items: center;
+  margin: 2px 0;
+}
+
+.usage-rank {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.usage-model {
+  color: var(--text);
+}
+
+.usage-pct {
+  text-align: right;
+  min-width: 30px;
+  color: var(--text-2);
+}
+
+/* ================= Empty / Error ================= */
+.usage-month-empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.usage-error {
+  padding: 10px 12px;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+
+  .usage-container {
+    width: calc(100dvw - 24px);
+    height: 100%;
+    height: calc(100vh - 48px);
+    height: calc(100dvh - 48px);
+
+    box-sizing: border-box;
+  }
+
+  .usage-subheader {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+  
+  .usage-year-row {
+    align-self: flex-start;
+  }
+
+  .usage-year-summary {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+
+  .usage-year-byModel,
+  .usage-winning-months {
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+
+  .usage-months-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: minmax(105px, auto);
+    gap: 10px;
+    padding: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .usage-month-cell {
+    padding: 10px 8px;
+    box-sizing: border-box;
+  }
+
+  .usage-month-name {
+    font-size: 16px;
+  }
+
+  .usage-model {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

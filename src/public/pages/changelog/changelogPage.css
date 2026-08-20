@@ -1,0 +1,100 @@
+@import '../shared/publicPage.css';
+
+.changelog-beta-label {
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-2);
+  background: var(--panel-2);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.changelog-beta-label svg {
+  color: var(--accent);
+}
+
+.changelog-list {
+  margin-top: 56px;
+  border-top: 1px solid var(--border);
+}
+
+.changelog-release {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 42px;
+  padding: 42px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.changelog-release aside {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.changelog-version {
+  width: fit-content;
+  padding: 6px 9px;
+  border-radius: 8px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.changelog-release time {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.changelog-release-content h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  letter-spacing: -0.03em;
+}
+
+.changelog-release-content > p {
+  max-width: 680px;
+  margin: 12px 0 24px;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+.changelog-release-content ul {
+  display: grid;
+  gap: 13px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.changelog-release-content li {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.changelog-release-content li svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--accent);
+}
+
+@media (max-width: 680px) {
+  .changelog-release {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .changelog-release aside {
+    flex-direction: row;
+    align-items: center;
+  }
+}

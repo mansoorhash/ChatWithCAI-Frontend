@@ -1,0 +1,120 @@
+.message-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    padding-top: 5px;
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.model {
+    padding-left: 5px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* Icon buttons */
+.ds-icon {
+    all: unset;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 10px;
+
+    color: var(--muted);
+    transition:
+        color 120ms ease,
+        transform 80ms ease;
+}
+
+.ds-icon:hover {
+    color: var(--text);
+    background-color: var(--hover);
+}
+
+.ds-icon:active {
+    transform: translateY(1px);
+}
+
+.ds-icon:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.ds-icon:disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
+
+.ds-icon:disabled:hover {
+    background: none;
+    color: var(--muted);
+}
+
+/* Tooltip */
+.tooltip-wrapper {
+    position: relative;
+}
+
+.tooltip-wrapper:hover .ds-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.ds-tooltip {
+    position: absolute;
+    top: 130%;
+    left: 50%;
+    z-index: 50;
+    transform: translateX(-50%) translateY(4px);
+    opacity: 0;
+    pointer-events: none;
+
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: var(--popover-shadow);
+
+    font-size: 12px;
+    white-space: nowrap;
+    transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.ds-tooltip::before,
+.ds-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-style: solid;
+}
+
+.ds-tooltip::before {
+    border-width: 7px;
+    border-color: transparent transparent var(--border) transparent;
+}
+
+.ds-tooltip::after {
+    border-width: 6px;
+    border-color: transparent transparent var(--panel) transparent;
+}
+
+.review-like[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.review-dislike[aria-pressed="true"] {
+  color: var(--danger);
+}

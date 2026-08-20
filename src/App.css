@@ -1,0 +1,380 @@
+:root {
+  /* backgrounds */
+  --app-bg: #EEF1F5;
+  --panel:  #F7F8FA;
+  --panel-2: #ECEFF4;
+  --panel-3: #E2E6EE;
+
+  /* text */
+  --text: #111827;
+  --text-1: rgba(17, 24, 39, 0.86);
+  --text-2: rgba(17, 24, 39, 0.72);
+  --text-3: var(--text-2);
+  --muted: rgba(17, 24, 39, 0.52);
+
+  /* borders */
+  --border: rgba(17, 24, 39, 0.10);
+  --border-2: rgba(17, 24, 39, 0.16);
+
+  /* effects */
+  --shadow: rgba(0, 0, 0, 0.08);
+
+  /* interactions */
+  --hover: rgba(17, 24, 39, 0.05);
+  --active: rgba(17, 24, 39, 0.09);
+
+  /* accents */
+  --accent: #4F46E5;        /* indigo */
+  --danger: #EF4444;
+  --selected: #111827;
+
+  /* Subscription (paid CTA) */
+  --upgrade: #a5a7ff;       /* slightly brighter than accent */
+  --upgrade-hover: #4A4FFF;
+
+  /* chat */
+  --user-bubble: #E7EBF2;
+  --ai-text: var(--text);
+  --user-text: var(--text);
+
+  /* inputs */
+  --input-bg: #F2F4F8;
+  --input-bg-1: #FFFFFF;
+  --input-border: rgba(17, 24, 39, 0.18);
+
+  /* popovers */
+  --popover-bg: #FAFBFC;
+  --popover-border: rgba(17, 24, 39, 0.14);
+  --popover-shadow: 0 10px 28px rgba(0,0,0,0.12);
+
+  /* error popups */
+  --error-popup-bg: rgba(120, 24, 24, 0.96);
+  --error-popup-text: #FFFFFF;
+  --error-popup-border: rgba(239, 68, 68, 0.32);
+  --error-popup-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+
+  /* success popups */
+  --success-popup-bg: #16A34A;
+  --success-popup-text: #FFFFFF;
+  --success-popup-border: rgba(34, 197, 94, 0.32);
+  --success-popup-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+
+  /* scrollbars */
+  --scrollbar-grad-top: rgba(17, 24, 39, 0.06);
+  --scrollbar-grad-mid: rgba(17, 24, 39, 0.24);
+
+  /* buttons */
+  --btn-grad-left:  #F3F5F8;
+  --btn-grad-right: #E6E9EF;
+  --btn-grad-hover-left:  #ECEFF4;
+  --btn-grad-hover-right: #DDE2EA;
+
+  /* Dropdown */
+  --dropdown-bg: #F7F8FA;
+  --dropdown-border: var(--border);
+  --dropdown-shadow: 0 6px 14px rgba(0,0,0,0.14);
+
+  /* Dropdown items */
+  --dropdown-item-text: var(--text);
+  --dropdown-item-hover-bg: rgba(17, 24, 39, 0.06);
+
+  /* Items */
+  --item-bg: #E7EBF2;
+  --item-border: #D7DCE6;
+  --item-bg-hover: #DDE3EE;
+  --item-bg-border-hover: #C7CEDB;
+
+  /* Inverse */
+  --inverse-color: #111827;
+  --inverse-bg: #111827;
+  --inverse-bg-hover: #1F2937;
+  --inverse-text: #374151;
+  --inverse-text-2: #F9FAFB;
+  --inverse-border: rgba(0, 0, 0, 0.45);
+
+  /* Loading */
+  --skeleton-base: #DDE3EC;
+  --skeleton-highlight: #F5F7FA;
+
+  /* Switches */
+  --switch-off: #9CA3AF;
+  --switch-on:  #22C55E;
+  --switch-knob: #FFFFFF;
+
+  /* Error */
+  --error-text: var(--danger);
+  --error-bg: #fecaca18;
+  
+  /*Messages*/
+  --code-bg: #1e2024;
+}
+:root[data-theme="dark"] {
+  --app-bg: #0B0F19;
+  --panel:  #111827;
+  --panel-2: #0F172A;
+
+  --text: #E5E7EB;
+  --text-1: rgba(229, 231, 235, 0.89);
+  --text-2: rgba(229, 231, 235, 0.78);
+  --text-3: rgba(188, 190, 193, 0.78);
+  --muted: rgba(229, 231, 235, 0.50);
+
+  --border: rgba(255, 255, 255, 0.10);
+  --shadow: rgba(0, 0, 0, 0.40);
+
+  --hover: rgba(255, 255, 255, 0.06);
+  --active: rgba(255, 255, 255, 0.10);
+
+  --accent: #6366F1;     /* indigo (same family) */
+  --danger: #F87171;
+  --selected: #E5E7EB;
+
+  /* Subscription (paid CTA) */
+  --upgrade: #38BDF8;
+  --upgrade-hover: #0EA5E9;
+  --upgrade-text: #FFFFFF;
+
+  --user-bubble: #1F2937;
+  --ai-text: var(--text);
+  --user-text: var(--text);
+
+  --input-bg: #0F172A;
+  --input-bg-1: #151B2A;
+  --input-border: rgba(255,255,255,0.16);
+
+  --scrollbar-grad-top: rgba(255, 255, 255, 0.06);
+  --scrollbar-grad-mid: rgba(255, 255, 255, 0.24);
+
+  --popover-bg: #111827;
+  --popover-border: rgba(255,255,255,0.12);
+  --popover-shadow: 0 10px 30px rgba(0,0,0,0.45);
+
+  --error-popup-bg: rgba(120, 24, 24, 0.96);
+  --error-popup-text: #FFFFFF;
+  --error-popup-border: rgba(248, 113, 113, 0.34);
+  --error-popup-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+
+  --success-popup-bg: #22C55E;
+  --success-popup-text: #FFFFFF;
+  --success-popup-border: rgba(74, 222, 128, 0.34);
+  --success-popup-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+
+  --btn-grad-left:  #1F2937;
+  --btn-grad-right: #111827;
+  --btn-grad-hover-left:  #263244;
+  --btn-grad-hover-right: #172033;
+
+  --dropdown-bg: #111827;
+  --dropdown-border: rgba(255,255,255,0.14);
+  --dropdown-shadow: 0 6px 14px rgba(0,0,0,0.55);
+
+  --dropdown-item-text: #F3F4F6;
+  --dropdown-item-hover-bg: rgba(255,255,255,0.06);
+
+  --item-bg: #0F172A;
+  --item-border: rgba(255,255,255,0.10);
+  --item-bg-hover: #111D33;
+  --item-bg-border-hover: rgba(255,255,255,0.16);
+
+  --inverse-color: #E5E7EB;
+  --inverse-bg: #F3F4F6;
+  --inverse-bg-hover: #E5E7EB;
+  --inverse-text: #111827;
+  --inverse-border: rgba(255,255,255,0.45);
+
+  --skeleton-base: #1A2335;
+  --skeleton-highlight: #2A3548;
+
+  --switch-off: #374151;
+  --switch-on:  #22C55E;
+  --switch-knob: #FFFFFF;
+  
+  /*Messages*/
+  --code-bg: #1e2024;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+
+
+#root {
+  width: 100%;
+  height: 100%;
+  height: 100vh;
+  height: 100dvh; 
+  margin: 0;
+  overflow: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Main App */
+.app {
+  background-color: var(--app-bg);
+}
+
+/* Loading */
+.loading-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.loading-text {
+  display: block;
+  width: 80%;
+  height: 1.2em;
+  margin: 0;
+
+  border-radius: 5px;
+  overflow: hidden;
+
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 0%,
+    var(--skeleton-base) 35%,
+    var(--skeleton-highlight) 50%,
+    var(--skeleton-base) 65%,
+    var(--skeleton-base) 100%
+  );
+
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s linear infinite;
+}
+
+/* Delete */
+.delete-button {
+  background-color: #bb2121 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+}
+.delete-button:hover {
+  background-color: #B91C1C !important;
+}
+.delete-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Scroll Bar */
+.scrollbar-custom {
+  overflow-y: auto;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  border-radius: 100px;
+  background: linear-gradient(
+    to bottom,
+    var(--scrollbar-grad-top),
+    var(--scrollbar-grad-mid) 30%,
+    var(--scrollbar-grad-mid) 70%,
+    var(--scrollbar-grad-top)
+  );
+}
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Keyframes */
+
+/* Loading Text */
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+
+/* COMPONENTS */
+.info-popup-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.info-popup-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.info-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-2);
+}
+
+.info-popup-container {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 12px;
+  z-index: 1000000000000000;
+  width: 260px;
+  color: var(--text-2);
+  text-align: left;
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px var(--shadow);
+}
+
+.info-popup-container .title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 8px 0 4px 0;
+  color: var(--text);
+  padding: 0 10px;
+}
+
+.info-popup-container p {
+  font-size: 13px;
+  padding: 0 10px;
+  margin: 4px 0;
+  line-height: 1.2;
+}
+
+.left-right-container {
+  flex-direction: column;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  margin-right: auto;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  margin-left: auto;
+}

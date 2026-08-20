@@ -1,0 +1,23 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--app-bg);
+    font-family: inherit;
+}
+
+.auth-card {
+    width: 90%;
+    max-width: 400px; /* Matches the width of the image form */
+    background-color: var(--panel);
+    border-radius: 32px; /* Soft rounded corners like the image */
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 40px var(--shadow);
+    padding: 32px 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}

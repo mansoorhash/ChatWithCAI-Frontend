@@ -1,0 +1,18 @@
+.chat-header {
+  padding: 0 24px;
+  border-bottom: 1px solid #5d5d5d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.loading-text {
+  color: transparent;
+  user-select: none;
+}
+
+/* Make each skeleton line a block for predictable width */
+.loading-text {
+  display: block;
+  height: 28px;
+  width: 110px;
+}
