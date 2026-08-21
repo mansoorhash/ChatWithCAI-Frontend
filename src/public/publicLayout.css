@@ -16,9 +16,11 @@
 }
 
 .content--inner {
-  padding-top: 32px; /* header height */
+  /* The header is absolutely positioned, so inner pages must reserve its
+     complete height before rendering their page heading. */
+  padding-top: var(--app-header-height);
 }
 
 .content > :first-child {
-  min-height: calc(100dvh - 80px);
+  min-height: calc(100dvh - var(--app-header-height));
 }

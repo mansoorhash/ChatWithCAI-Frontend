@@ -191,8 +191,8 @@ export default function Subscription({
             <div className="left">
               <div className="title">Ends in</div>
               <div className="subline">
-                {autoRenew ? `Renewal on ${dateString(renewal)}` : "Subscription cancelling"} on{" "}
-                {dateString(expires)}
+                {autoRenew ? `Renewal on ${dateString(renewal)}` : 
+                `Subscription cancelling ${dateString(expires)}`}
               </div>
             </div>
             <div className="right">

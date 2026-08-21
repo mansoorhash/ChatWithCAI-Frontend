@@ -44,11 +44,12 @@
 .page-segment {
   position: relative;
   flex: 1;
-  min-height: calc(100dvh - 80px);
+  min-height: calc(100dvh - var(--app-header-height));
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 0 0;
+  /* Lift the visual center without changing the header or document flow. */
+  padding: 0 0 calc(var(--optical-center-lift) + var(--optical-center-lift));
 }
 
 .hero-shell {

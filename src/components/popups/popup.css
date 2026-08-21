@@ -1,20 +1,26 @@
 .background {
   position: fixed;
-  top: 0;
-  left: 0;
-  min-width: 100vw;
-  min-height: 100vh;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 16px 16px calc(16px + var(--optical-center-lift) + var(--optical-center-lift));
+  overflow-x: hidden;
+  overflow-y: auto;
 
   /* overlay */
   background: color-mix(in srgb, var(--app-bg) 45%, transparent);
 
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   z-index: 10000;
 }
 
 .modal {
+  flex: 0 0 auto;
+  max-width: 100%;
+  margin-block: auto;
   background: var(--panel);
   min-width: 200px;
   border-radius: 12px;
@@ -101,4 +107,10 @@
 
 .actions button.danger:hover {
   background: color-mix(in srgb, var(--danger) 20%, var(--panel));
+}
+
+@media (max-width: 768px) {
+  .background {
+    overflow-y: hidden;
+  }
 }

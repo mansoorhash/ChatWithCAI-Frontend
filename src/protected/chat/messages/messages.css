@@ -1,6 +1,5 @@
 /* Base chat message bubble */
 .chat-msg {
-  width: 90%;
   max-width: 90%;
   min-width: 0;
   padding: 12px 16px;
@@ -48,4 +47,74 @@
   text-align: center;
   letter-spacing: 0.3px;
   color: var(--text-2);
+}
+
+.continuation-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0 12px;
+}
+
+.continuation-row::before,
+.continuation-row::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+}
+
+.continue-response {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: color 150ms ease;
+}
+
+.continue-response:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+.continue-response:hover:not(:disabled) .continue-chevron {
+  animation: chevron-drop 700ms ease-in-out infinite;
+}
+
+.continue-response:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
+  border-radius: 3px;
+}
+
+.continue-response:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@keyframes chevron-drop {
+  0%,
+  100% {
+    transform: translateY(-1px);
+  }
+
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+.continuation-error {
+  color: var(--danger);
+  font-size: 13px;
 }

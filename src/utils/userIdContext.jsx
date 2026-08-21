@@ -88,14 +88,14 @@ export function UserIdProvider({ children }) {
     return accessTokenRef.current;
   }, []);
 
-  const clearStorage = async () => {
+  const clearStorage = useCallback(() => {
     sessionStorage.removeItem(USAGE_KEY);
     sessionStorage.removeItem(LOCKED_KEY);
     sessionStorage.removeItem(ENABLED_KEY);
 
     localStorage.removeItem(CHAT_TOTALCOUNT);
     localStorage.removeItem(CHAT_EXPIRATION);
-  };
+  }, []);
 
   const handleTokenRefresh = useCallback(async () => {
     try {
@@ -112,7 +112,7 @@ export function UserIdProvider({ children }) {
     checkStatus();
   }, []);
 
-  const handleLogout = async ({ delete: deleteSession = false } = {}) => {
+  const handleLogout = useCallback(async ({ delete: deleteSession = false } = {}) => {
     if (!deleteSession) {
       try {
         await fetch(`${API_BASE}/auth/logout`, {
@@ -130,7 +130,7 @@ export function UserIdProvider({ children }) {
     setErr(null);
     clearStorage();
     localStorage.setItem('user_state', 'false');
-  };
+  }, [clearStorage, updateAccessToken]);
 
   return (
     <Ctx.Provider

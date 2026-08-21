@@ -7,7 +7,6 @@ import DeleteItem from '../../components/popups/type/deleteConfirmation';
 import Popup from '../../components/popups/popup';
 import SettingsLayout from './settings/layout';
 import {
-  FaComments,
   FaCog,
   FaSignOutAlt,
   FaQuestionCircle,
@@ -16,14 +15,14 @@ import {
   FaSignInAlt,
   FaEllipsisH,
   FaEdit,
-  FaTrash,
-  FaChartBar
+  FaTrash
 } from 'react-icons/fa';
 import Usage from './usage/usage';
 import SpinnerRounded from '../../components/loading';
 import { deleteSessionServer, editSessionServer } from '../../api/chat/session';
 import mergeSessions from '../utils/session'
 import { useUserID } from '../../utils/userIdContext';
+import { ChartNoAxesColumnIncreasing, SquarePen } from 'lucide-react';
 
 export default function Sidebar({
   setErrorMessage,
@@ -288,11 +287,11 @@ export default function Sidebar({
 
         <div className="sidebar-menu-top">
           <button className="sidebar-item" onClick={onNewChat} data-tooltip="New Chat">
-            <FaComments /> {!collapsed && 'New Chat'}
+            <SquarePen size={17} strokeWidth={2} /> {!collapsed && 'New Chat'}
           </button>
 
           <button className="sidebar-item" onClick={handleUsage}>
-            <FaChartBar /> {!collapsed && 'Usage'}
+            <ChartNoAxesColumnIncreasing size={17} strokeWidth={2} />{!collapsed && 'Usage'}
           </button>
         </div>
         {!collapsed && (

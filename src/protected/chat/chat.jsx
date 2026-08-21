@@ -11,7 +11,10 @@ import {
 } from 'lucide-react';
 import './chat.css';
 import { useUserID } from '../../utils/userIdContext';
-import { sendChatTurnServer } from '../../api/chat/message';
+import {
+  continueChatMessageServer,
+  sendChatTurnServer,
+} from '../../api/chat/message';
 import ChatModelTraining from './components/modelTraining';
 import { CHAT_TOTALCOUNT, CHAT_EXPIRATION } from '../../utils/constants';
 
@@ -80,6 +83,8 @@ export default function Chat({
   const hasLoadedOnceRef = useRef(false);
   const cooldownRef = useRef(false);
   const wasGeneratingRef = useRef(false);
+  const messageAbortRef = useRef(null);
+  const messageReaderRef = useRef(null);
 
   useEffect(() => {
     turnsRef.current = turns;
@@ -138,9 +143,6 @@ export default function Chat({
     })();
 
     return () => { cancelled = true; };
-    // Session changes are the deliberate trigger; adding fetch flags here
-    // would consume the one-shot skip and immediately fetch again.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.id]);
 
   // Scroll management
@@ -180,11 +182,9 @@ export default function Chat({
     if (editedTurn === null) return;
 
     const onDown = (e) => {
-      // if click is inside the input bar, ignore
       const bar = document.querySelector(".chat-input-bar");
       if (bar && bar.contains(e.target)) return;
 
-      // otherwise exit edit mode
       setEditedTurn(null);
       setEditValue('');
     };
@@ -193,14 +193,13 @@ export default function Chat({
     return () => document.removeEventListener("mousedown", onDown);
   }, [editedTurn]);
 
-  // Select Input Bar on Edit
   useEffect(() => {
     if (editedTurn !== null && editInputRef.current) {
       requestAnimationFrame(() => {
         const el = editInputRef.current;
         el.focus();
         const n = el.value.length;
-        el.setSelectionRange(n, n); // caret at end, no highlight
+        el.setSelectionRange(n, n);
       });
     }
   }, [editedTurn]);
@@ -211,14 +210,12 @@ export default function Chat({
 
     const max = parseInt(getComputedStyle(el).maxHeight, 10) || 240;
 
-    // Reset first
     el.style.height = "auto";
 
-    // If empty, collapse to 1 row height (line-height + padding)
     const text = (editedTurn !== null ? editValue : input);
     if (!text) {
       el.style.overflowY = "hidden";
-      return; // height stays "auto" which collapses to rows=1
+      return;
     }
 
     const next = Math.min(el.scrollHeight, max);
@@ -298,6 +295,18 @@ export default function Chat({
     return newSession;
   };
 
+  const stopMessage = () => {
+    const controller = messageAbortRef.current;
+    if (!controller || controller.signal.aborted) return;
+
+    controller.abort();
+
+    const reader = messageReaderRef.current;
+    if (reader) {
+      void reader.cancel("User stopped generation").catch(() => {});
+    }
+  };
+
   // Send message function
   const sendMessage = async (
     text = input.trim(),
@@ -306,8 +315,21 @@ export default function Chat({
     if (!text || messageLoading) return;
     if (turnSequence === null) setInput('');
 
+    const requestController = new AbortController();
+    messageAbortRef.current = requestController;
+    messageReaderRef.current = null;
     setMessageLoading(true);
     setMessageProcessing(true);
+
+    const turnsWithoutContinuations = turnsRef.current.map((turn) => {
+      if (!turn?.ai?.continuation) return turn;
+      const ai = { ...turn.ai };
+      delete ai.continuation;
+      return { ...turn, ai };
+    });
+    turnsRef.current = turnsWithoutContinuations;
+    setTurns(turnsWithoutContinuations);
+
     if (newChat) {
       setSkipPageFetch(true);
       session = await handleNewChat(text);
@@ -327,9 +349,11 @@ export default function Chat({
       .reverse()
       .find((turn) => turn?.ai?.messageId && !turn.ai.error);
 
-    const lastTurnSeq = Number(lastTurn?.turnSeq ?? 0);
+    const lastVisibleTurnSeq = Number(
+      turnsRef.current[turnsRef.current.length - 1]?.turnSeq ?? 0
+    );
 
-    const messageId = crypto.randomUUID();
+    const messageId = uuidv4();
 
     const retryingFailedAi = existingTurn?.ai?.error === true;
 
@@ -342,7 +366,7 @@ export default function Chat({
       : existingTurn?.ai?.messageId || "";
 
     const newTurn = {
-      turnSeq: existingTurn?.turnSeq ?? lastTurnSeq + 1,
+      turnSeq: existingTurn?.turnSeq ?? lastVisibleTurnSeq + 1,
       user: existingTurn?.user ?? {
         message: text,
         messageId: messageId,
@@ -351,20 +375,31 @@ export default function Chat({
       },
       ai: {
         messageSeq: nextAiMessageSeq,
-        parentMessageId: messageId,
+        parentMessageId: existingTurn?.user?.messageId ?? messageId,
         prevMessageId: previousStoredAiId,
       },
       title: session?.title || "Untitled",
     };
 
     const updatedTurns = existingTurn
-      ? turnsRef.current.map((turn) =>
-          turn.turnSeq === newTurn.turnSeq ? newTurn : turn
-        )
+      ? turnsRef.current
+          .filter((turn) => turn.turnSeq <= newTurn.turnSeq)
+          .map((turn) =>
+            turn.turnSeq === newTurn.turnSeq ? newTurn : turn
+          )
       : [...turnsRef.current, newTurn];
+    turnsRef.current = updatedTurns;
     setTurns(updatedTurns);
+    let receivedResponseContent = false;
+
     try {
-      const res = await sendChatTurnServer(session.id, newTurn, accessToken, updateAccessToken);
+      const res = await sendChatTurnServer(
+        session.id,
+        newTurn,
+        accessToken,
+        updateAccessToken,
+        requestController.signal,
+      );
 
       if (res?.unauthorized) {
         setMessageLoading(false);
@@ -376,6 +411,7 @@ export default function Chat({
       }
 
       const reader = res.body.getReader();
+      messageReaderRef.current = reader;
       const decoder = new TextDecoder();
 
       let buffer = "";
@@ -432,7 +468,9 @@ export default function Chat({
           contentChanged = true;
         }
 
-        if (msg.type === "partial") {
+        if (msg.type === "final") {
+          receivedTerminalEvent = true;
+          receivedResponseContent = true;
           const requestData = msg.request;
 
           if (requestData) {
@@ -450,25 +488,6 @@ export default function Chat({
             }
           }
 
-          setTurns((prev) =>
-            prev.map((turn) =>
-              turn.turnSeq === newTurn.turnSeq
-                ? {
-                    ...turn,
-                    ai: {
-                      ...turn.ai,
-                      message: msg.content,
-                    },
-                  }
-                : turn
-              )
-          );
-          contentChanged = true;
-        }
-
-        if (msg.type === "final") {
-          receivedTerminalEvent = true;
-
           if (msg.content.title) {
             const newTitle = msg.content.title;
 
@@ -481,16 +500,24 @@ export default function Chat({
             );
           }
 
+          const finalTurn = msg.continuation
+            ? {
+                ...msg.content,
+                ai: {
+                  ...msg.content.ai,
+                  continuation: msg.continuation,
+                },
+              }
+            : msg.content;
+
           setTurns((prev) =>
             prev.map((turn) =>
               turn.turnSeq === newTurn.turnSeq
-                ? msg.content
+                ? finalTurn
                 : turn
             )
           );
 
-          setMessageLoading(false);
-          setMessageProcessing(false);
           contentChanged = true;
         }
 
@@ -504,7 +531,9 @@ export default function Chat({
                     ...turn,
                     ai: {
                       ...turn.ai,
-                      message: msg.content,
+                      ...(!receivedResponseContent
+                        ? { message: msg.content }
+                        : {}),
                       error: true,
                     },
                   }
@@ -512,8 +541,6 @@ export default function Chat({
             )
           );
 
-          setMessageLoading(false);
-          setMessageProcessing(false);
           contentChanged = true;
         }
 
@@ -560,6 +587,29 @@ export default function Chat({
         throw new Error("Chat stream ended before a final event was received");
       }
     } catch (err) {
+      const stopped =
+        requestController.signal.aborted || err?.name === "AbortError";
+
+      if (stopped) {
+        setTurns((prev) =>
+          prev.map((turn) =>
+            turn.turnSeq === newTurn.turnSeq
+              ? {
+                  ...turn,
+                  ai: {
+                    ...turn.ai,
+                    ...(!receivedResponseContent
+                      ? { message: "Response stopped." }
+                      : {}),
+                    stopped: true,
+                  },
+                }
+              : turn
+          )
+        );
+        return;
+      }
+
       console.error('API error:', err);
       const serverMessage =
         err?.body?.detail?.message ||
@@ -582,11 +632,174 @@ export default function Chat({
             : t
         )
       );
-      setMessageProcessing(false);
-      setMessageLoading(false);
-    }
+    } finally {
+      if (messageAbortRef.current === requestController) {
+        messageAbortRef.current = null;
+        messageReaderRef.current = null;
+        setMessageProcessing(false);
+        setMessageLoading(false);
+      }
 
-    hasLoadedOnceRef.current = true;
+      hasLoadedOnceRef.current = true;
+    }
+  };
+
+  const continueMessage = async (turnSeq, continuationId) => {
+    if (!continuationId) return;
+
+    const requestController = new AbortController();
+    messageAbortRef.current = requestController;
+    messageReaderRef.current = null;
+    setMessageLoading(true);
+    setMessageProcessing(true);
+    setTurns((prev) => prev.map((turn) =>
+      turn.turnSeq === turnSeq
+        ? {
+            ...turn,
+            ai: {
+              ...turn.ai,
+              continuation: {
+                ...turn.ai.continuation,
+                loading: true,
+                error: null,
+              },
+            },
+          }
+        : turn
+    ));
+
+    let receivedTerminalEvent = false;
+
+    try {
+      const res = await continueChatMessageServer(
+        session.id,
+        continuationId,
+        accessToken,
+        updateAccessToken,
+        requestController.signal,
+      );
+      if (res?.unauthorized) return;
+      if (!res?.body) throw new Error("No continuation stream was returned");
+
+      const reader = res.body.getReader();
+      messageReaderRef.current = reader;
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      const processEvent = (msg) => {
+        if (msg.type === "continuation") {
+          receivedTerminalEvent = true;
+          setTurns((prev) => prev.map((turn) => {
+            if (turn.turnSeq !== turnSeq) return turn;
+
+            const current = turn?.ai?.message;
+            const currentBlocks = current?.format === "blocks_v1"
+              && Array.isArray(current.blocks)
+              ? current.blocks
+              : [];
+            const addedBlocks = msg?.content?.format === "blocks_v1"
+              && Array.isArray(msg.content.blocks)
+              ? msg.content.blocks
+              : [];
+            const ai = {
+              ...turn.ai,
+              message: {
+                format: "blocks_v1",
+                blocks: [...currentBlocks, ...addedBlocks],
+              },
+            };
+
+            if (msg.continuation) {
+              ai.continuation = msg.continuation;
+            } else {
+              delete ai.continuation;
+            }
+            return { ...turn, ai };
+          }));
+        }
+
+        if (msg.type === "continuation_error") {
+          receivedTerminalEvent = true;
+          setTurns((prev) => prev.map((turn) =>
+            turn.turnSeq === turnSeq
+              ? {
+                  ...turn,
+                  ai: {
+                    ...turn.ai,
+                    continuation: {
+                      ...turn.ai.continuation,
+                      loading: false,
+                      error: msg.content,
+                    },
+                  },
+                }
+              : turn
+          ));
+        }
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (value) buffer += decoder.decode(value, { stream: true });
+        if (done) buffer += decoder.decode();
+
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (line.trim()) processEvent(JSON.parse(line));
+        }
+        if (done) {
+          if (buffer.trim()) processEvent(JSON.parse(buffer));
+          break;
+        }
+      }
+
+      if (!receivedTerminalEvent) {
+        throw new Error("Continuation stream ended unexpectedly");
+      }
+    } catch (err) {
+      if (requestController.signal.aborted || err?.name === "AbortError") {
+        setTurns((prev) => prev.map((turn) =>
+          turn.turnSeq === turnSeq
+            ? {
+                ...turn,
+                ai: {
+                  ...turn.ai,
+                  continuation: {
+                    ...turn.ai.continuation,
+                    loading: false,
+                    error: null,
+                  },
+                },
+              }
+            : turn
+        ));
+        return;
+      }
+      console.error("Continuation failed:", err);
+      setTurns((prev) => prev.map((turn) =>
+        turn.turnSeq === turnSeq
+          ? {
+              ...turn,
+              ai: {
+                ...turn.ai,
+                continuation: {
+                  ...turn.ai.continuation,
+                  loading: false,
+                  error: "Unable to continue right now. Please try again.",
+                },
+              },
+            }
+          : turn
+      ));
+    } finally {
+      if (messageAbortRef.current === requestController) {
+        messageAbortRef.current = null;
+        messageReaderRef.current = null;
+        setMessageProcessing(false);
+        setMessageLoading(false);
+      }
+    }
   };
 
   // Input keydown handler
@@ -647,6 +860,7 @@ export default function Chat({
               messageProcessing={messageProcessing}
               setMessageError={setErrorMessage}
               regenerate={sendMessage}
+              continueMessage={continueMessage}
             />
           </>
         ) : (
@@ -720,21 +934,16 @@ export default function Chat({
               />
               {messageLoading ? (
                 <button
+                  type="button"
                   className="chat-send"
-                  onClick={
-                    editedTurn !== null
-                      ? () => setEditedTurn(null)
-                      : () => sendMessage()
-                  }
-                  disabled={
-                    messageLoading ||
-                    (editedTurn === null && !activeText.trim())
-                  }
+                  onClick={stopMessage}
+                  aria-label="Stop generating"
                 >
                   <Square size={20} />
                 </button>
               ) : (
                 <button
+                  type="button"
                   className="chat-send"
                   onClick={
                     editedTurn !== null
@@ -745,6 +954,7 @@ export default function Chat({
                     messageLoading ||
                     (editedTurn === null && !activeText.trim())
                   }
+                  aria-label="Send message"
                 >
                   <Send size={20} />
                 </button>

@@ -5,7 +5,7 @@
 }
 
 .legal-document {
-  padding: clamp(80px, 6vw, 72px);
+  padding: clamp(40px, 5vw, 56px);
 }
 
 .legal-document h1 {
@@ -112,7 +112,7 @@
 
 @media (max-width: 600px) {
   .legal-page {
-    padding: 28px 16px 64px;
+    padding: 0 16px 64px;
   }
 
   .legal-document {

@@ -1,4 +1,8 @@
 :root {
+  /* shared layout measurements */
+  --app-header-height: 80px;
+  --optical-center-lift: 40px;
+
   /* backgrounds */
   --app-bg: #EEF1F5;
   --panel:  #F7F8FA;

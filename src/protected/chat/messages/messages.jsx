@@ -2,6 +2,7 @@ import React from "react";
 import MessageRender from "./messageRender";
 import MessageActions from "./messageActions";
 import "./messages.css";
+import { ChevronsDown } from "lucide-react";
 
 function Messages({
   turns,
@@ -10,7 +11,8 @@ function Messages({
   catalogDict,
   messageProcessing,
   setMessageError,
-  regenerate
+  regenerate,
+  continueMessage,
 }) {
 
   return (
@@ -45,6 +47,37 @@ function Messages({
                 data={t.ai}
                 messageProcessing={processing}
               />
+              {t?.ai?.continuation?.id && (
+                <div className="continuation-row">
+                  <button
+                    type="button"
+                    className="continue-response"
+                    disabled={messageProcessing || t?.ai?.continuation?.loading}
+                    aria-busy={t?.ai?.continuation?.loading}
+                    onClick={() => {
+                      if (t?.ai?.continuation?.id) {
+                        continueMessage(t.turnSeq, t.ai.continuation.id);
+                      }
+                    }}
+                  >
+                    {!t?.ai?.continuation?.loading && (
+                      <ChevronsDown className="continue-chevron" size={14} strokeWidth={2} aria-hidden="true" />
+                    )}
+
+                    {t?.ai?.continuation?.loading
+                      ? <div className="processing-status">
+                          Continuing…
+                        </div>
+                      : "Continue response"}
+                  </button>
+
+                  {t?.ai?.continuation?.error && (
+                    <span className="continuation-error" role="status">
+                      {t.ai.continuation.error}
+                    </span>
+                  )}
+                </div>
+              )}
               {!processing && (
                 <MessageActions 
                   speaker={"ai"}
