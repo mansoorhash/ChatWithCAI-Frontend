@@ -948,7 +948,7 @@ export default function Chat({
                     : setInput(e.target.value)
                 }
                 rows={1}
-                placeholder="Get the Best Answer"
+                placeholder="How can I help?"
               />
               <div className="chat-input-actions">
                 {messageLoading ? (
