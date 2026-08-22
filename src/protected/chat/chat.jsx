@@ -6,6 +6,7 @@ import SpinnerRounded from '../../components/loading';
 import Messages from './messages/messages';
 import {v4 as uuidv4} from "uuid";
 import {
+  ArrowUp,
   Send,
   Square,
 } from 'lucide-react';
@@ -71,6 +72,7 @@ export default function Chat({
   const [turns, setTurns] = useState([]);
   const turnsRef = useRef(turns);
   const hasTurns = turns.length > 0;
+  const hasSelectedSession = Boolean(sessionId);
 
   // Message States
   const [editedTurn, setEditedTurn] = useState(null);
@@ -705,7 +707,9 @@ export default function Chat({
               ...turn.ai,
               message: {
                 format: "blocks_v1",
-                blocks: [...currentBlocks, ...addedBlocks],
+                blocks: msg.replace
+                  ? addedBlocks
+                  : [...currentBlocks, ...addedBlocks],
               },
             };
 
@@ -814,13 +818,18 @@ export default function Chat({
     }
   };
 
+  const focusMessageInput = (event) => {
+    if (event.target.closest("button, a")) return;
+    editInputRef.current?.focus();
+  };
+
   const CHAT_MESSAGE_LIMIT = 20;
   const totalMessagesUsed = Number(chatTotalCount) || 0;
   const messagesRemaining = Math.max(
     CHAT_MESSAGE_LIMIT - totalMessagesUsed,
     0
   );
-  const showMessageReminder = messagesRemaining <= 5;
+  const showMessageReminder = messagesRemaining <= 8;
   const expirationTimestamp = Number(chatExpiration);
   const resetDate =
     expirationTimestamp > 0
@@ -838,8 +847,15 @@ export default function Chat({
   return (
     <div className="chat-container">
       {hasTurns ? <ChatHeader session={session} chatLoading={chatLoading} /> : null}
-
-      <div className="chat-box scrollbar-custom" ref={scrollRef} onScroll={onScrollChat}>
+      <div className={`chat-main ${hasSelectedSession ? "" : "no-session"}`}>
+      <div
+        className={`chat-box scrollbar-custom ${
+          hasSelectedSession ? "" : "no-session"
+        }`}
+        ref={scrollRef}
+        onScroll={onScrollChat}
+      >
+        <div className="chat-content">
         {chatLoading ? (
           <div className="loading-container">
             <SpinnerRounded />
@@ -865,11 +881,10 @@ export default function Chat({
           </>
         ) : (
           <div className="empty-state">
-            <img src="/logo.svg" alt="Logo" className="empty-logo" width={125}/>
-            <h2>Hi, It's CAI</h2>
-            <p>How can I help you today?</p>
+            <h2>What should we solve together?</h2>
           </div>
         )}
+        </div>
       </div>
       <div className="chat-input-wrapper">
         {!showTrainingChoice && showMessageReminder && (
@@ -881,7 +896,7 @@ export default function Chat({
           >
             {messagesRemaining === 0 ? (
               <>
-                You’ve reached your message limit.
+                You've reached your message limit.
                 {resetLabel && (
                   <> You can send more messages after <strong>{resetLabel}</strong>.</>
                 )}
@@ -906,6 +921,9 @@ export default function Chat({
           className={`chat-input-bar ${
             showTrainingChoice ? "training" : ""
           } ${editedTurn !== null ? "editing" : ""}`}
+          role="group"
+          aria-label="Message composer"
+          onPointerDown={focusMessageInput}
         >
           {editedTurn !== null && (
             <div className="edit-inline-label">Editing…</div>
@@ -932,44 +950,53 @@ export default function Chat({
                 rows={1}
                 placeholder="Get the Best Answer"
               />
-              {messageLoading ? (
-                <button
-                  type="button"
-                  className="chat-send"
-                  onClick={stopMessage}
-                  aria-label="Stop generating"
-                >
-                  <Square size={20} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="chat-send"
-                  onClick={
-                    editedTurn !== null
-                      ? () => setEditedTurn(null)
-                      : () => sendMessage()
-                  }
-                  disabled={
-                    messageLoading ||
-                    (editedTurn === null && !activeText.trim())
-                  }
-                  aria-label="Send message"
-                >
-                  <Send size={20} />
-                </button>
-              )}
+              <div className="chat-input-actions">
+                {messageLoading ? (
+                  <button
+                    type="button"
+                    className="chat-send chat-send-stop"
+                    onClick={stopMessage}
+                    aria-label="Stop generating"
+                  >
+                    <Square
+                      size={15}
+                      strokeWidth={2}
+                      fill="currentColor"
+                      aria-hidden="true"
+                    />
+                    <span className="chat-send-text">Stop</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="chat-send"
+                    onClick={
+                      editedTurn !== null
+                        ? () => setEditedTurn(null)
+                        : () => sendMessage()
+                    }
+                    disabled={
+                      messageLoading ||
+                      (editedTurn === null && !activeText.trim())
+                    }
+                    aria-label="Send message"
+                  >
+                    <ArrowUp size={18} strokeWidth={2.5} aria-hidden="true" />
+                    <span className="chat-send-text">Send</span>
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
-
-        <div className="chat-footer">
+      </div>
+      </div>
+      <div className="chat-footer">
           <span>
             ChatWithCAI responses may be inaccurate. Verify important
             information.
           </span>
         </div>
-      </div>
     </div>
   );
 }

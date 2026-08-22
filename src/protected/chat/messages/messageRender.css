@@ -57,6 +57,11 @@
   color: var(--text-2);
 }
 
+.chat-msg.ai .ai-bullets.ai-numbered-bullets {
+  padding-left: 38px;
+  list-style-type: decimal;
+}
+
 /* Links */
 .chat-msg.ai a {
   color: var(--accent);

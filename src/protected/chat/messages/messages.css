@@ -1,6 +1,6 @@
 /* Base chat message bubble */
 .chat-msg {
-  max-width: 90%;
+  max-width: 70%;
   min-width: 0;
   padding: 12px 16px;
   border-radius: 16px;
@@ -117,4 +117,10 @@
 .continuation-error {
   color: var(--danger);
   font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .chat-msg {
+    max-width: 95%;
+  }
 }

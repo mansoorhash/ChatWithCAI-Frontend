@@ -1,8 +1,7 @@
 /* Clamp sidebar width hard and prevent horizontal overflow */
 .sidebar {
-  flex: 0 0 220px;
-  width: 220px;
-  max-width: 220px;
+  flex: 0 0 260px;
+  max-width: 260px;
   min-width: 220px;
   background-color: var(--panel);
   height: 100%;
@@ -154,7 +153,7 @@
 
 .sidebar-menu-top {
   width: 100%;
-  max-width: 185px;
+  max-width: 230px;
   box-sizing: border-box;
 }
 
@@ -274,7 +273,7 @@
 }
 
 .chat-history-scroll {
-  width: 185px;
+  width: 230px;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;

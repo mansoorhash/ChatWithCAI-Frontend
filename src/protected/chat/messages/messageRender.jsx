@@ -2,8 +2,27 @@ import React, {useState} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Copy, CopyCheck } from 'lucide-react';
+import copyToClipboard from './utils/copyToClipboard';
 import './messageRender.css';
 import "./messageActions.css";
+
+const NUMBERED_ITEM_PATTERN = /^\s*(\d+)[.)]\s+([\s\S]+)$/;
+
+function parseNumberedItems(items) {
+  if (!Array.isArray(items) || items.length === 0) return null;
+
+  const parsed = items.map((item) => {
+    if (typeof item !== 'string') return null;
+    const match = item.match(NUMBERED_ITEM_PATTERN);
+    if (!match) return null;
+
+    const value = Number.parseInt(match[1], 10);
+    if (!Number.isSafeInteger(value) || value < 1) return null;
+    return { value, text: match[2] };
+  });
+
+  return parsed.every(Boolean) ? parsed : null;
+}
 
 export default function MessageRender({ speaker, data, messageProcessing}) {
   const isAi = speaker === 'ai';
@@ -37,7 +56,7 @@ export default function MessageRender({ speaker, data, messageProcessing}) {
   }
   const handleCodeCopy = async (rawText) => {
     try {
-        await navigator.clipboard.writeText(rawText);
+        await copyToClipboard(rawText);
 
         setIsCopied(true);
         setTimeout(() => {
@@ -77,15 +96,34 @@ export default function MessageRender({ speaker, data, messageProcessing}) {
               );
 
             case 'bullets':
-              return (
-                <ul key={i} className="ai-bullets">
-                  {b.items?.map((item, j) => (
-                    <li key={j}>
-                      <MarkdownText>{item}</MarkdownText>
-                    </li>
-                  ))}
-                </ul>
-              );
+              {
+                const numberedItems = parseNumberedItems(b.items);
+                if (numberedItems) {
+                  return (
+                    <ol
+                      key={i}
+                      className="ai-bullets ai-numbered-bullets"
+                      start={numberedItems[0].value}
+                    >
+                      {numberedItems.map((item, j) => (
+                        <li key={j} value={item.value}>
+                          <MarkdownText>{item.text}</MarkdownText>
+                        </li>
+                      ))}
+                    </ol>
+                  );
+                }
+
+                return (
+                  <ul key={i} className="ai-bullets">
+                    {b.items?.map((item, j) => (
+                      <li key={j}>
+                        <MarkdownText>{item}</MarkdownText>
+                      </li>
+                    ))}
+                  </ul>
+                );
+              }
 
             case 'code':
               return (
@@ -93,6 +131,7 @@ export default function MessageRender({ speaker, data, messageProcessing}) {
                   <div className="code-header">
                     <div className="code-header-right">
                       <button
+                        type="button"
                         disabled={isCopied}
                         className="ds-icon tooltip-wrapper"
                         onClick={() => handleCodeCopy(b?.text)}

@@ -7,6 +7,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import blocksToText from "./utils/blockToText";
+import copyToClipboard from "./utils/copyToClipboard";
 import "./messageActions.css";
 import { useUserID } from "../../../utils/userIdContext";
 import { updateMessageReview } from "../../../api/chat/message";
@@ -27,11 +28,11 @@ export default function MessageActions({
     const handleCopy = async (rawText) => {
         try {
             let text = rawText;
-            if (speaker === "ai" && Array.isArray(rawText.blocks)) {
+            if (speaker === "ai" && Array.isArray(rawText?.blocks)) {
                 text = blocksToText(rawText.blocks);
             }
 
-            await navigator.clipboard.writeText(text);
+            await copyToClipboard(text);
 
             setIsCopied(true);
             setTimeout(() => {
@@ -69,18 +70,18 @@ export default function MessageActions({
     };
 
     const onCopy = async () => {
-        handleCopy(data.message);
+        await handleCopy(data.message);
     }
     return (
         <div className="message-meta-row">
             <div className="message-actions">
                 {!messageError ? (
                     <>
-                    <button disabled={isCopied} className="ds-icon tooltip-wrapper" onClick={onCopy}>
+                    <button type="button" disabled={isCopied} className="ds-icon tooltip-wrapper" onClick={onCopy}>
                         {isCopied ? 
                             <CopyCheck size={16}/> : <Copy size={16}/>  
                         }
-                        <span className="ds-tooltip">Copy</span>
+                        <span className="ds-tooltip">{isCopied ? "Copied" : "Copy"}</span>
                     </button>
 
                     {speaker === "ai" ? 

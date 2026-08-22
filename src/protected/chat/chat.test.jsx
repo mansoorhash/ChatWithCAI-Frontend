@@ -345,7 +345,7 @@ describe('chat message sending', () => {
     expect(sendButton).toBeEnabled();
   });
 
-  test('appends a continuation to the same visible AI message', async () => {
+  test('replaces a partial block with the canonical seamless continuation', async () => {
     apiMocks.sendChatTurnServer.mockReset().mockResolvedValue(
       streamedResponse({
         type: 'final',
@@ -374,6 +374,24 @@ describe('chat message sending', () => {
             parentMessageId: 'user-2',
           },
         },
+      }),
+    );
+    apiMocks.continueChatMessageServer.mockReset().mockResolvedValue(
+      streamedResponse({
+        type: 'continuation',
+        turnSeq: 2,
+        replace: true,
+        content: {
+          format: 'blocks_v1',
+          blocks: [
+            {
+              type: 'p',
+              text: 'First partial answer continued seamlessly',
+              items: [],
+            },
+          ],
+        },
+        continuation: null,
       }),
     );
 
@@ -411,7 +429,8 @@ describe('chat message sending', () => {
       expect(apiMocks.continueChatMessageServer).toHaveBeenCalledOnce();
     });
 
-    expect(await screen.findByText('Continued answer')).toBeInTheDocument();
+    expect(await screen.findByText('First partial answer continued seamlessly'))
+      .toBeInTheDocument();
     expect(apiMocks.continueChatMessageServer).toHaveBeenCalledWith(
       session.id,
       '22222222-2222-4222-8222-222222222222',
@@ -419,7 +438,7 @@ describe('chat message sending', () => {
       expect.any(Function),
       expect.any(AbortSignal),
     );
-    expect(screen.getByText('First partial answer')).toBeInTheDocument();
+    expect(screen.queryByText('First partial answer')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Continue response' }))
       .not.toBeInTheDocument();
   });

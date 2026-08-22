@@ -46,6 +46,7 @@ export default function DataControls({
                     className="info-trigger"
                     onClick={() => setShowModelTraining((current) => !current)}
                     onMouseEnter={() => setShowModelTraining(true)}
+                    aria-label="Model training information"
                     aria-expanded={showModelTraining}
                     >
                     <Info size={15} />
@@ -66,9 +67,11 @@ export default function DataControls({
             <div className="right">
                 <label className="switch">
                     <input
+                    id="model-training-toggle"
                     type="checkbox"
                     checked={modelTraining}
                     onChange={handleModelTraining}
+                    aria-label="Allow model training"
                     />
                     <span className="slider"/>
                 </label>
