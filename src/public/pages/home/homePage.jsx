@@ -43,7 +43,7 @@ export default function Home() {
         <div className="hero-shell">
           <div className='construction'>
             <FadeIn
-              text="AVAILABLE SOON"
+              text="AVAILABLE NOW"
             />
           </div>
           <div className="hero-copy">

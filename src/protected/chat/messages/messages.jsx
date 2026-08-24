@@ -23,7 +23,6 @@ function Messages({
         const aiMessage = t?.ai?.message;
         const messageError = typeof aiMessage === "string" && t?.ai?.error;
         const processing = messageProcessing && i === turns.length - 1;
-        console.log(t)
         return (
         <React.Fragment key={i}>
           {/* USER MESSAGE */}

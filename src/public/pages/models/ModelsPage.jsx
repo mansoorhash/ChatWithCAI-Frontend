@@ -22,6 +22,20 @@ const providerFamilies = [
 ];
 
 const activeTiers = ['free', 'plus', 'pro'];
+const modelStatusLabels = {
+  active: 'Active',
+  preview: 'Preview',
+  retiring: 'Retiring',
+  unavailable: 'Unavailable',
+};
+
+function normalizeModelStatus(status) {
+  return Object.hasOwn(modelStatusLabels, status) ? status : 'active';
+}
+
+function formatTier(tier) {
+  return tier.charAt(0).toUpperCase() + tier.slice(1);
+}
 
 const routingSteps = [
   {
@@ -83,7 +97,7 @@ export default function ModelsPage() {
       .filter((model) => provider.matches(model.id))
       .map((model) => ({
         ...model,
-        providerStatus: model.providerStatus ?? 'active',
+        providerStatus: normalizeModelStatus(model.providerStatus),
       })),
   }));
 
@@ -149,7 +163,11 @@ export default function ModelsPage() {
                       </strong>
 
                       <small className={loading ? 'loading-text' : ''}>
-                        {loading ? '\u00A0' : `${provider.models.length} models`}
+                        {loading
+                          ? '\u00A0'
+                          : `${provider.models.length} model${
+                              provider.models.length === 1 ? '' : 's'
+                            }`}
                       </small>
                     </span>
 
@@ -177,7 +195,52 @@ export default function ModelsPage() {
 
                   {!loading && (
                     <div className="model-provider-content">
-                      {/* existing model list */}
+                      {provider.models.length > 0 ? (
+                        <div className="provider-model-list">
+                          {provider.models.map((model) => (
+                            <div
+                              className="provider-model-row"
+                              key={`${model.tier}-${model.id}`}
+                            >
+                              <div className="provider-model-copy">
+                                <div className="provider-model-name">
+                                  <strong>{model.label || model.id}</strong>
+                                  <span
+                                    className="model-tier-separator"
+                                    aria-hidden="true"
+                                  >
+                                    ·
+                                  </span>
+                                  <span className="model-tier">
+                                    {formatTier(model.tier)}
+                                  </span>
+                                </div>
+
+                                {model.statusNote && (
+                                  <small>{model.statusNote}</small>
+                                )}
+
+                                {model.scheduledRetirement && (
+                                  <small className="retirement-note">
+                                    Scheduled retirement: {model.scheduledRetirement}
+                                  </small>
+                                )}
+                              </div>
+
+                              <span
+                                className={`model-status ${model.providerStatus}`}
+                              >
+                                <span className="status-dot" aria-hidden="true" />
+                                {modelStatusLabels[model.providerStatus]}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="provider-model-empty">
+                          No models are currently listed for this provider.
+                        </p>
+                      )}
                     </div>
                   )}
                 </details>

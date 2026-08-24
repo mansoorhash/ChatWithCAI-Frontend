@@ -28,13 +28,17 @@
   --active: rgba(17, 24, 39, 0.09);
 
   /* accents */
-  --accent: #4F46E5;        /* indigo */
+  --accent: #5B5CE2;
+  --accent-hover: #6A6BE8;
+  --accent-active: #4C4DCC;
   --danger: #EF4444;
   --selected: #111827;
 
   /* Subscription (paid CTA) */
-  --upgrade: #a5a7ff;       /* slightly brighter than accent */
-  --upgrade-hover: #4A4FFF;
+  --upgrade: #7C83F6;
+  --upgrade-hover: #8B91FA;
+  --upgrade-active: #6D73E6;
+  --upgrade-text: #FFFFFF;
 
   /* chat */
   --user-bubble: #E7EBF2;
@@ -116,6 +120,7 @@
   --app-bg: #0B0F19;
   --panel:  #111827;
   --panel-2: #0F172A;
+  
 
   --text: #E5E7EB;
   --text-1: rgba(229, 231, 235, 0.89);
@@ -129,14 +134,16 @@
   --hover: rgba(255, 255, 255, 0.06);
   --active: rgba(255, 255, 255, 0.10);
 
-  --accent: #6366F1;     /* indigo (same family) */
+  --accent: #6C70F5;
+  --accent-hover: #7B7FF8;
+  --accent-active: #5D61DE;
   --danger: #F87171;
   --selected: #E5E7EB;
 
   /* Subscription (paid CTA) */
-  --upgrade: #38BDF8;
-  --upgrade-hover: #0EA5E9;
-  --upgrade-text: #FFFFFF;
+  --upgrade: #6366F1;
+  --upgrade-hover: #7376F4;
+  --upgrade-active: #5558D9;
 
   --user-bubble: #1F2937;
   --ai-text: var(--text);
@@ -195,6 +202,10 @@
   
   /*Messages*/
   --code-bg: #1e2024;
+
+  --disabled-bg: #111827;
+  --disabled-border: rgba(255, 255, 255, 0.08);
+  --disabled-text: rgba(229, 231, 235, 0.48);
 }
 
 html,

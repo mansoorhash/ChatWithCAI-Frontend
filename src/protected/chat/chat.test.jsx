@@ -2,6 +2,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import Chat from './chat.jsx';
+import {
+  CHAT_EXPIRATION,
+  CHAT_TOTALCOUNT,
+} from '../../utils/constants.js';
 
 const apiMocks = vi.hoisted(() => ({
   fetchSessionServer: vi.fn(),
@@ -186,6 +190,45 @@ describe('chat message sending', () => {
     expect(accessToken).toBe('access-token');
     expect(apiMocks.sendChatTurnServer.mock.calls[0][6]).toBe(false);
     expect(await screen.findByText('Streamed answer')).toBeInTheDocument();
+  });
+
+  test('synchronizes manually edited or deleted chat-limit storage', async () => {
+    const oneHourFromNow = Math.floor(Date.now() / 1000) + 60 * 60;
+    window.localStorage.setItem(CHAT_TOTALCOUNT, '13');
+    window.localStorage.setItem(CHAT_EXPIRATION, String(oneHourFromNow));
+
+    render(
+      <MemoryRouter>
+        <Chat
+          setSuccessMessage={vi.fn()}
+          setErrorMessage={vi.fn()}
+          session={session}
+          setSessions={vi.fn()}
+          skipPageFetch={false}
+          setSkipPageFetch={vi.fn()}
+          newChat={false}
+          sessionId={session.id}
+          catalogDict={{}}
+          trainingState={false}
+          setTrainingState={vi.fn()}
+          modelLabelsById={{}}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/7 messages left/)).toBeInTheDocument();
+
+    window.localStorage.setItem(CHAT_TOTALCOUNT, '19');
+    window.dispatchEvent(new Event('focus'));
+    expect(await screen.findByText(/1 message left/)).toBeInTheDocument();
+
+    window.localStorage.removeItem(CHAT_TOTALCOUNT);
+    window.localStorage.removeItem(CHAT_EXPIRATION);
+    window.dispatchEvent(new Event('focus'));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/message left/)).not.toBeInTheDocument();
+    });
   });
 
   test('occasionally asks for feedback on a completed response', async () => {

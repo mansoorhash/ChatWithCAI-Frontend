@@ -4,6 +4,18 @@ import './changelogPage.css';
 
 const releases = [
   {
+    version: 'v0.6.1',
+    date: 'August 24, 2026',
+    title: 'Usage and Model Catalog Fixes',
+    summary: 'Usage information now stays current, with clearer model and plan navigation.',
+    changes: [
+      'Synchronized the displayed message count and reset time when their locally cached values change or are removed.',
+      'Corrected the reset timestamp returned when the daily message limit is reached.',
+      'Displayed model names, tiers, availability, preview notes, and retirement dates inside each provider dropdown.',
+      'Linked View Tiers directly to the plans page and added clearer hover, active, and keyboard-focus feedback.',
+    ],
+  },
+  {
     version: 'v0.6.0',
     date: 'August 23, 2026',
     title: 'Safer Regeneration and Service Reliability',

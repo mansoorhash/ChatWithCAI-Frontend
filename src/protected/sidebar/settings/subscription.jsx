@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import "./subscription.css";
 
 export default function Subscription({ 
@@ -204,11 +205,11 @@ export default function Subscription({
       </div>
 
       <div className="sub-footer">
-        <div className="sub-actions">
-          <div className="left">
-            <button className="upgrade">View Tiers</button>
+          <div className="sub-actions">
+              <Link className="upgrade" to="/plans">
+                View Tiers
+              </Link>
           </div>
-        </div>
       </div>
     </div>
   );

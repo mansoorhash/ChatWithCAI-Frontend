@@ -21,6 +21,27 @@ import { CHAT_TOTALCOUNT, CHAT_EXPIRATION } from '../../utils/constants';
 const FEEDBACK_PROMPT_CHANCE = 0.2;
 const FEEDBACK_PROMPT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const FEEDBACK_PROMPT_LAST_SHOWN = 'chat_feedback_prompt_last_shown';
+const CHAT_LIMIT_STORAGE_SYNC_MS = 1000;
+
+function readStoredChatLimits() {
+  const storedTotal = localStorage.getItem(CHAT_TOTALCOUNT);
+  const parsedTotal = Number(storedTotal);
+  const total =
+    storedTotal !== null && Number.isFinite(parsedTotal) && parsedTotal >= 0
+      ? Math.trunc(parsedTotal)
+      : 0;
+
+  const storedExpiration = localStorage.getItem(CHAT_EXPIRATION);
+  const parsedExpiration = Number(storedExpiration);
+  const expiration =
+    storedExpiration !== null &&
+    Number.isFinite(parsedExpiration) &&
+    parsedExpiration > 0
+      ? parsedExpiration
+      : null;
+
+  return { total, expiration };
+}
 
 export function shouldRequestFeedback(
   now = Date.now(),
@@ -88,13 +109,11 @@ export default function Chat({
   const [messageProcessing, setMessageProcessing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [feedbackPromptTurnSeq, setFeedbackPromptTurnSeq] = useState(null);
-  const [chatTotalCount, setTotalCount] = useState(() => {
-    const storedCount = localStorage.getItem(CHAT_TOTALCOUNT);
-    return storedCount !== null ? Number(storedCount) || 0 : 0;
-  });
-
+  const [chatTotalCount, setTotalCount] = useState(
+    () => readStoredChatLimits().total
+  );
   const [chatExpiration, setChatExpiration] = useState(
-    () => localStorage.getItem(CHAT_EXPIRATION)
+    () => readStoredChatLimits().expiration
   );
   const initialScrollRef = useRef(false);
 
@@ -255,6 +274,48 @@ export default function Chat({
     el.style.height = `${next}px`;
     el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
   }, [input, editValue, editedTurn, session?.id]);
+
+  useEffect(() => {
+    const syncStoredChatLimits = () => {
+      const { total, expiration } = readStoredChatLimits();
+      setTotalCount((current) => current === total ? current : total);
+      setChatExpiration((current) =>
+        current === expiration ? current : expiration
+      );
+    };
+
+    const handleStorage = (event) => {
+      if (
+        event.key !== null &&
+        event.key !== CHAT_TOTALCOUNT &&
+        event.key !== CHAT_EXPIRATION
+      ) {
+        return;
+      }
+      syncStoredChatLimits();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncStoredChatLimits();
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", syncStoredChatLimits);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    const intervalId = window.setInterval(
+      syncStoredChatLimits,
+      CHAT_LIMIT_STORAGE_SYNC_MS
+    );
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", syncStoredChatLimits);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   useEffect(() => {
     const expirationTimestamp = Number(chatExpiration);
@@ -606,6 +667,21 @@ export default function Chat({
 
         if (msg.type === "error") {
           receivedTerminalEvent = true;
+
+          if (msg.code == "daily_limit_exceeded") {
+            const total = Number(20);
+            const expires = Number(msg.resetsAt);
+
+            if (Number.isFinite(total)) {
+              setTotalCount(total);
+              localStorage.setItem(CHAT_TOTALCOUNT, String(total));
+            }
+
+            if (Number.isFinite(expires)) {
+              setChatExpiration(expires);
+              localStorage.setItem(CHAT_EXPIRATION, String(expires));
+            }
+          }
 
           setTurns((prev) =>
             prev.map((turn) =>

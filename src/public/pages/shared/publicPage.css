@@ -79,12 +79,17 @@
   font: inherit;
   font-weight: 700;
   text-decoration: none;
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
 }
 
 .public-info-button:hover {
   border-color: var(--border-2, var(--input-border));
-  background: var(--panel-3, var(--active));
+  color: var(--text);
+  background: var(--panel-3);
   transform: translateY(-1px);
 }
 
@@ -95,8 +100,34 @@
 }
 
 .public-info-button.primary:hover {
-  border-color: var(--upgrade-hover);
-  background: var(--upgrade-hover);
+  border-color: color-mix(in srgb, var(--accent) 88%, white);
+  background: color-mix(in srgb, var(--accent) 88%, white);
+}
+
+.public-info-button.primary:active {
+  border-color: color-mix(in srgb, var(--accent) 88%, black);
+  background: color-mix(in srgb, var(--accent) 88%, black);
+  transform: translateY(0);
+}
+
+.public-info-button:disabled,
+.public-info-button[aria-disabled="true"],
+.public-info-button.disabled {
+  border-color: var(--border);
+  color: var(--muted);
+  background: var(--panel);
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+.public-info-button:disabled:hover,
+.public-info-button[aria-disabled="true"]:hover,
+.public-info-button.disabled:hover {
+  border-color: var(--border);
+  color: var(--muted);
+  background: var(--panel);
+  transform: none;
 }
 
 .public-info-button:focus-visible,

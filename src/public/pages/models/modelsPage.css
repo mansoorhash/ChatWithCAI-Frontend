@@ -204,6 +204,14 @@
   border-top: 1px solid var(--border);
 }
 
+.provider-model-empty {
+  margin: 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .provider-model-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
