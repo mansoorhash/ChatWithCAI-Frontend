@@ -6,6 +6,8 @@ export async function sendChatTurnServer(
   accessToken,
   updateAccessToken,
   signal,
+  regenerationRank = null,
+  regenerate = false,
 ) {
   if (!sessionId) {
     throw new Error("sendChatTurnServer requires a sessionId");
@@ -19,6 +21,10 @@ export async function sendChatTurnServer(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           turnData,
+          ...(Number.isInteger(regenerationRank)
+            ? { regenerationRank }
+            : {}),
+          ...(regenerate ? { regenerate: true } : {}),
         }),
         signal,
       },

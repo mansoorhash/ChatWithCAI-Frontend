@@ -7,7 +7,6 @@ import Messages from './messages/messages';
 import {v4 as uuidv4} from "uuid";
 import {
   ArrowUp,
-  Send,
   Square,
 } from 'lucide-react';
 import './chat.css';
@@ -18,6 +17,36 @@ import {
 } from '../../api/chat/message';
 import ChatModelTraining from './components/modelTraining';
 import { CHAT_TOTALCOUNT, CHAT_EXPIRATION } from '../../utils/constants';
+
+const FEEDBACK_PROMPT_CHANCE = 0.2;
+const FEEDBACK_PROMPT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const FEEDBACK_PROMPT_LAST_SHOWN = 'chat_feedback_prompt_last_shown';
+
+export function shouldRequestFeedback(
+  now = Date.now(),
+  random = Math.random,
+) {
+  try {
+    const lastShown = Number(
+      localStorage.getItem(FEEDBACK_PROMPT_LAST_SHOWN),
+    );
+
+    if (
+      Number.isFinite(lastShown) &&
+      lastShown > 0 &&
+      now - lastShown < FEEDBACK_PROMPT_COOLDOWN_MS
+    ) {
+      return false;
+    }
+
+    if (random() >= FEEDBACK_PROMPT_CHANCE) return false;
+
+    localStorage.setItem(FEEDBACK_PROMPT_LAST_SHOWN, String(now));
+    return true;
+  } catch {
+    return random() < FEEDBACK_PROMPT_CHANCE;
+  }
+}
 
 
 function coerceTurns(data) {
@@ -58,6 +87,7 @@ export default function Chat({
   const [messageLoading, setMessageLoading] = useState(false);
   const [messageProcessing, setMessageProcessing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [feedbackPromptTurnSeq, setFeedbackPromptTurnSeq] = useState(null);
   const [chatTotalCount, setTotalCount] = useState(() => {
     const storedCount = localStorage.getItem(CHAT_TOTALCOUNT);
     return storedCount !== null ? Number(storedCount) || 0 : 0;
@@ -105,6 +135,7 @@ export default function Chat({
     // reset edit states
     setEditedTurn(null);
     setEditValue('');
+    setFeedbackPromptTurnSeq(null);
     if (!session) {
       setTurns([]);
       setChatLoading(false);
@@ -225,6 +256,40 @@ export default function Chat({
     el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
   }, [input, editValue, editedTurn, session?.id]);
 
+  useEffect(() => {
+    const expirationTimestamp = Number(chatExpiration);
+
+    if (
+      !Number.isFinite(expirationTimestamp) ||
+      expirationTimestamp <= 0
+    ) {
+      return;
+    }
+
+    const resetChatLimit = () => {
+      setChatExpiration(null);
+      setTotalCount(0);
+
+      localStorage.removeItem(CHAT_EXPIRATION);
+      localStorage.setItem(CHAT_TOTALCOUNT, "0");
+    };
+
+    const millisecondsRemaining =
+      expirationTimestamp * 1000 - Date.now();
+
+    if (millisecondsRemaining <= 0) {
+      resetChatLimit();
+      return;
+    }
+
+    const timeoutId = window.setTimeout(
+      resetChatLimit,
+      millisecondsRemaining
+    );
+
+    return () => window.clearTimeout(timeoutId);
+  }, [chatExpiration]);
+
   // Fetch page helper
   const fetchPage = async (cursor) => {
     // Must support optional cursor:
@@ -312,10 +377,12 @@ export default function Chat({
   // Send message function
   const sendMessage = async (
     text = input.trim(),
-    turnSequence = null
+    turnSequence = null,
+    regenerationRank = null,
   ) => {
     if (!text || messageLoading) return;
     if (turnSequence === null) setInput('');
+    setFeedbackPromptTurnSeq(null);
 
     const requestController = new AbortController();
     messageAbortRef.current = requestController;
@@ -395,12 +462,20 @@ export default function Chat({
     let receivedResponseContent = false;
 
     try {
+      const requestTurn = {
+        ...newTurn,
+        user: { ...newTurn.user },
+      };
+      delete requestTurn.user.alternativeModels;
+
       const res = await sendChatTurnServer(
         session.id,
-        newTurn,
+        requestTurn,
         accessToken,
         updateAccessToken,
         requestController.signal,
+        regenerationRank,
+        turnSequence !== null,
       );
 
       if (res?.unauthorized) {
@@ -502,15 +577,15 @@ export default function Chat({
             );
           }
 
-          const finalTurn = msg.continuation
-            ? {
-                ...msg.content,
-                ai: {
-                  ...msg.content.ai,
-                  continuation: msg.continuation,
-                },
-              }
-            : msg.content;
+          const finalTurn = {
+            ...msg.content,
+            ai: {
+              ...msg.content.ai,
+              ...(msg.continuation
+                ? { continuation: msg.continuation }
+                : {}),
+            },
+          };
 
           setTurns((prev) =>
             prev.map((turn) =>
@@ -519,6 +594,12 @@ export default function Chat({
                 : turn
             )
           );
+
+          if (!finalTurn?.ai?.error && shouldRequestFeedback()) {
+            setFeedbackPromptTurnSeq(
+              finalTurn?.turnSeq ?? newTurn.turnSeq,
+            );
+          }
 
           contentChanged = true;
         }
@@ -601,7 +682,7 @@ export default function Chat({
                   ai: {
                     ...turn.ai,
                     ...(!receivedResponseContent
-                      ? { message: "Response stopped." }
+                      ? { message: "Message generation stopped." }
                       : {}),
                     stopped: true,
                   },
@@ -824,17 +905,19 @@ export default function Chat({
   };
 
   const CHAT_MESSAGE_LIMIT = 20;
+
   const totalMessagesUsed = Number(chatTotalCount) || 0;
   const messagesRemaining = Math.max(
     CHAT_MESSAGE_LIMIT - totalMessagesUsed,
     0
   );
-  const showMessageReminder = messagesRemaining <= 8;
   const expirationTimestamp = Number(chatExpiration);
   const resetDate =
+    Number.isFinite(expirationTimestamp) &&
     expirationTimestamp > 0
       ? new Date(expirationTimestamp * 1000)
       : null;
+
   const resetLabel =
     resetDate && !Number.isNaN(resetDate.getTime())
       ? resetDate.toLocaleString([], {
@@ -844,9 +927,11 @@ export default function Chat({
           minute: "2-digit",
         })
       : null;
+
+  const showMessageReminder = messagesRemaining <= 8;
   return (
     <div className="chat-container">
-      {hasTurns ? <ChatHeader session={session} chatLoading={chatLoading} /> : null}
+      <ChatHeader session={session} chatLoading={chatLoading} />
       <div className={`chat-main ${hasSelectedSession ? "" : "no-session"}`}>
       <div
         className={`chat-box scrollbar-custom ${
@@ -877,6 +962,8 @@ export default function Chat({
               setMessageError={setErrorMessage}
               regenerate={sendMessage}
               continueMessage={continueMessage}
+              feedbackPromptTurnSeq={feedbackPromptTurnSeq}
+              dismissFeedbackPrompt={() => setFeedbackPromptTurnSeq(null)}
             />
           </>
         ) : (
@@ -948,7 +1035,7 @@ export default function Chat({
                     : setInput(e.target.value)
                 }
                 rows={1}
-                placeholder="How can I help?"
+                placeholder={!hasSelectedSession ? "What shall we work on today?" : "How can I help..."}
               />
               <div className="chat-input-actions">
                 {messageLoading ? (

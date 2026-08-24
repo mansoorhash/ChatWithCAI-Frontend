@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { Mail, MessageSquareText, ShieldCheck } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import './contactPage.css';
+
+const BUG_REPORT_TEMPLATE = `What happened?
+
+What did you expect to happen?
+
+Steps to reproduce:
+1. `;
 
 const contactOptions = [
   {
@@ -18,12 +26,14 @@ const contactOptions = [
 ];
 
 export default function ContactPage() {
-  const [form, setForm] = useState({
+  const [searchParams] = useSearchParams();
+  const isBugReport = searchParams.get('topic') === 'bug';
+  const [form, setForm] = useState(() => ({
     name: '',
-    email: '',
-    topic: 'Product support',
-    message: '',
-  });
+    email: isBugReport ? 'support@chatwithcai.com' : '',
+    topic: isBugReport ? 'Bug report' : 'Product support',
+    message: isBugReport ? BUG_REPORT_TEMPLATE : '',
+  }));
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -122,6 +132,7 @@ export default function ContactPage() {
           <label>
             <span>Message</span>
             <textarea
+              className="scrollbar-custom"
               name="message"
               onChange={updateField}
               placeholder="Describe what happened and include any visible error message."

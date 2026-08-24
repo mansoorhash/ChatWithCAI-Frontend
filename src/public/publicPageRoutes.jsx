@@ -18,6 +18,7 @@ export const publicPageRoutes = [
   { path: '/changelog', element: <ChangelogPage /> },
   { path: '/faq', element: <FaqPage /> },
   { path: '/contact', element: <ContactPage /> },
+  { path: '/support', element: <ContactPage /> },
   { path: '/status', element: <StatusPage /> },
   { path: '/copyright', element: <CopyrightPage />},
 ];

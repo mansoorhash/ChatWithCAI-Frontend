@@ -616,4 +616,9 @@
   .sidebar-menu {
     width: 100%;
   }
+
+  .sidebar-menu-top, .chat-history-scroll {
+    width: 100%;
+    max-width: 190px;
+  }
 }

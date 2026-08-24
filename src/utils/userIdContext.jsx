@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import { retreiveAccessToken } from '../api/basefetch/refresh'
 import { API_BASE } from '../config'
 import { USAGE_KEY, LOCKED_KEY, ENABLED_KEY, CHAT_TOTALCOUNT, CHAT_EXPIRATION } from "./constants";
+import { LogoutAccount } from "../api/authentication/logout";
 
 const Ctx = createContext({
   authenticated: false,
@@ -113,15 +114,10 @@ export function UserIdProvider({ children }) {
   }, []);
 
   const handleLogout = useCallback(async ({ delete: deleteSession = false } = {}) => {
+    const ctrl = new AbortController();
+
     if (!deleteSession) {
-      try {
-        await fetch(`${API_BASE}/auth/logout`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-      } catch (error) {
-        console.error('Failed to delete server session:', error);
-      }
+      const res = await LogoutAccount(ctrl.signal);
     }
 
     setAuthed(false);

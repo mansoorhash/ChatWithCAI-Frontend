@@ -143,7 +143,7 @@ export default function VerifyAccount() {
       const data = await res.json().catch(() => ({}));
       setFormError(data.message || "Verification failed.");
     } catch (err) {
-      if (err.body?.detail?.code === "ExpiredCodeException") {
+      if (err.body?.detail?.code === "EXPIRED_VERIFICATION_CODE") {
         setFormError("Expired code, resend the code.")
       } else { 
         setFormError(

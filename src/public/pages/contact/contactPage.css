@@ -118,6 +118,36 @@
   padding: 12px;
   line-height: 1.55;
   resize: vertical;
+  scrollbar-color: var(--muted) transparent;
+}
+
+.contact-form textarea::-webkit-scrollbar {
+  width: 10px;
+}
+
+.contact-form textarea::-webkit-scrollbar-track,
+.contact-form textarea::-webkit-scrollbar-corner {
+  background: var(--input-bg);
+}
+
+.contact-form textarea::-webkit-scrollbar-thumb {
+  border: 3px solid var(--input-bg);
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.contact-form textarea::-webkit-resizer {
+  border-radius: 0 0 10px 0;
+  background:
+    linear-gradient(
+      135deg,
+      transparent 0 54%,
+      var(--muted) 54% 60%,
+      transparent 60% 68%,
+      var(--muted) 68% 74%,
+      transparent 74%
+    ),
+    var(--input-bg);
 }
 
 .contact-form textarea::placeholder {

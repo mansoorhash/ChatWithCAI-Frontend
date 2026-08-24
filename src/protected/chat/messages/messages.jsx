@@ -13,6 +13,8 @@ function Messages({
   setMessageError,
   regenerate,
   continueMessage,
+  feedbackPromptTurnSeq,
+  dismissFeedbackPrompt,
 }) {
 
   return (
@@ -21,6 +23,7 @@ function Messages({
         const aiMessage = t?.ai?.message;
         const messageError = typeof aiMessage === "string" && t?.ai?.error;
         const processing = messageProcessing && i === turns.length - 1;
+        console.log(t)
         return (
         <React.Fragment key={i}>
           {/* USER MESSAGE */}
@@ -35,7 +38,6 @@ function Messages({
                 data={t.user}
                 sessionId={sessionId}
               />
-
             </div>
           )}
 
@@ -86,7 +88,12 @@ function Messages({
                   catalogDict={catalogDict}
                   messageError={messageError}
                   setMessageError={setMessageError}
-                  regenerate={() => regenerate(t.user.message, t.turnSeq)}
+                  regenerationOptions={t.user?.alternativeModels}
+                  regenerate={(rank) =>
+                    regenerate(t.user.message, t.turnSeq, rank)
+                  }
+                  showFeedbackPrompt={feedbackPromptTurnSeq === t.turnSeq}
+                  dismissFeedbackPrompt={dismissFeedbackPrompt}
                 />
               )}
             </div>

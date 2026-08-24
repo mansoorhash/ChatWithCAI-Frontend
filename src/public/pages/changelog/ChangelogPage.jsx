@@ -4,25 +4,66 @@ import './changelogPage.css';
 
 const releases = [
   {
-    version: 'v0.5.0',
-    date: 'August 15, 2026',
-    title: 'Private Beta Final Release',
-    summary: 'The final version of the private beta before public release.',
+    version: 'v0.6.0',
+    date: 'August 23, 2026',
+    title: 'Safer Regeneration and Service Reliability',
+    summary: 'More control over regenerated answers, backed by stronger validation and clearer errors.',
     changes: [
-      'Message Regeneration Added',
-      'UI + Bug Fixes',
-      'A whole lotta stuff'
+      'Added ranked alternative models to the Try again menu and preserved them after refresh.',
+      'Validated regeneration choices against the saved conversation, enabled models, context size, and current subscription tier.',
+      'Kept one-click regeneration available for older conversations without ranked alternatives.',
+      'Improved output token management and structured model responses.',
+      'Added clearer, more consistent error handling across authentication, chat, sessions, settings, and usage.',
     ],
   },
   {
-    version: 'v0.5.0.1',
-    date: 'August 15, 2026',
-    title: 'Region Lock',
-    summary: 'Fixed user sign in location identification',
+    version: 'v0.5.4',
+    date: 'August 20, 2026',
+    title: 'Public Beta and Long Responses',
+    summary: 'CAI entered public beta with a more resilient chat experience.',
     changes: [
-      'Location identification to ensure region lock based on sign up/in.',
+      'Released the redesigned public beta application.',
+      'Added controls to stop an active response and continue one that reaches its output limit.',
+      'Recovered incomplete responses across supported model providers.',
+      'Improved the message composer, mobile layout, numbered lists, and copy-to-clipboard behavior.',
+      'Fixed daily message counting and reset-time handling.',
     ],
-  }
+  },
+  {
+    version: 'v0.5.2',
+    date: 'August 18, 2026',
+    title: 'Long-Running Chat Requests',
+    summary: 'Chat requests now remain responsive while models work on longer answers.',
+    changes: [
+      'Added asynchronous status updates for long model requests.',
+      'Reduced false connection failures while waiting for a response.',
+      'Improved fallback recovery when a model cannot complete a request.',
+    ],
+  },
+  {
+    version: 'v0.5.1',
+    date: 'August 17, 2026',
+    title: 'Model and Account Reliability',
+    summary: 'Improved model routing and fixed several account-access issues.',
+    changes: [
+      'Displayed the active model while a response is being generated.',
+      'Improved fallback behavior when the first selected model fails.',
+      'Fixed Gemini response structuring and provider calls.',
+      'Fixed regional identification and default model selections during registration.',
+    ],
+  },
+  {
+    version: 'v0.5.0',
+    date: 'August 15, 2026',
+    title: 'Data Controls and Feedback',
+    summary: 'The final private-beta update added privacy controls and response feedback.',
+    changes: [
+      'Added controls to allow or decline the use of conversations for model training.',
+      'Added response reviews and message-usage tracking.',
+      'Added regional availability checks for Canada and the United States.',
+      'Improved policy-consent handling during account setup.',
+    ],
+  },
 ];
 
 export default function ChangelogPage() {

@@ -1,4 +1,9 @@
 .chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 58px;
   padding: 0 24px;
   border-bottom: 1px solid #5d5d5d;
   font-size: 14px;
@@ -15,4 +20,46 @@
   display: block;
   height: 28px;
   width: 110px;
+}
+
+.chat-header h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-support-link {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  background-color: var(--accent);
+  border-radius: 9px;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.chat-support-link:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.chat-support-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .chat-header {
+    padding-inline: 16px;
+  }
+
+  .chat-support-link {
+    padding-inline: 8px;
+  }
 }

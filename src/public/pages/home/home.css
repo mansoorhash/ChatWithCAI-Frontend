@@ -48,8 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Lift the visual center without changing the header or document flow. */
-  padding: 0 0 calc(var(--optical-center-lift) + var(--optical-center-lift));
+  padding: 0;
 }
 
 .hero-shell {
