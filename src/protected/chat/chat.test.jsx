@@ -85,6 +85,22 @@ function streamedResponse(...events) {
   };
 }
 
+function chunkedStreamResponse(events, chunkSize = 7) {
+  const encoder = new TextEncoder();
+  const payload = events.map((event) => JSON.stringify(event)).join('\n');
+
+  return {
+    body: new ReadableStream({
+      start(controller) {
+        for (let offset = 0; offset < payload.length; offset += chunkSize) {
+          controller.enqueue(encoder.encode(payload.slice(offset, offset + chunkSize)));
+        }
+        controller.close();
+      },
+    }),
+  };
+}
+
 describe('chat message sending', () => {
   let originalRandomUUID;
 
@@ -95,7 +111,7 @@ describe('chat message sending', () => {
       messages: [existingTurn],
       lastKey: null,
     });
-    apiMocks.sendChatTurnServer.mockResolvedValue(
+    apiMocks.sendChatTurnServer.mockImplementation(() => Promise.resolve(
       streamedResponse({
         type: 'final',
         content: {
@@ -115,7 +131,7 @@ describe('chat message sending', () => {
           },
         },
       }),
-    );
+    ));
     apiMocks.continueChatMessageServer.mockResolvedValue(
       streamedResponse({
         type: 'continuation',
@@ -190,6 +206,75 @@ describe('chat message sending', () => {
     expect(accessToken).toBe('access-token');
     expect(apiMocks.sendChatTurnServer.mock.calls[0][6]).toBe(false);
     expect(await screen.findByText('Streamed answer')).toBeInTheDocument();
+  });
+
+  test('links an edited user message to the previous user message', async () => {
+    apiMocks.sendChatTurnServer.mockResolvedValueOnce(
+      streamedResponse({
+        type: 'final',
+        content: {
+          turnSeq: 1,
+          title: session.title,
+          user: {
+            message: 'Edited question',
+            messageId: 'user-1-edited',
+            messageSeq: 2,
+            parentMessageId: '#ROOT',
+            prevMessageId: 'user-1',
+          },
+          ai: {
+            message: 'Answer to edited question',
+            messageId: 'ai-1-edited',
+            messageSeq: 1,
+            parentMessageId: 'user-1-edited',
+            prevMessageId: '',
+          },
+        },
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <Chat
+          setSuccessMessage={vi.fn()}
+          setErrorMessage={vi.fn()}
+          session={session}
+          setSessions={vi.fn()}
+          skipPageFetch={false}
+          setSkipPageFetch={vi.fn()}
+          newChat={false}
+          sessionId={session.id}
+          catalogDict={{}}
+          trainingState={false}
+          setTrainingState={vi.fn()}
+          modelLabelsById={{}}
+        />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Earlier answer');
+    fireEvent.click(screen.getByText('Edit').closest('button'));
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Edited question' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+
+    await waitFor(() => {
+      expect(apiMocks.sendChatTurnServer).toHaveBeenCalledOnce();
+    });
+
+    const request = apiMocks.sendChatTurnServer.mock.calls[0][1];
+    expect(request.turnSeq).toBe(1);
+    expect(request.user.message).toBe('Edited question');
+    expect(request.user.messageId).not.toBe('user-1');
+    expect(request.user.messageSeq).toBe(2);
+    expect(request.user.parentMessageId).toBe('#ROOT');
+    expect(request.user.prevMessageId).toBe('user-1');
+    expect(request.ai.messageSeq).toBe(1);
+    expect(request.ai.parentMessageId).toBe(request.user.messageId);
+    expect(request.ai.prevMessageId).toBe('');
+    expect(apiMocks.sendChatTurnServer.mock.calls[0][6]).toBe(false);
+    expect(await screen.findByText('Answer to edited question')).toBeInTheDocument();
   });
 
   test('synchronizes manually edited or deleted chat-limit storage', async () => {
@@ -389,11 +474,19 @@ describe('chat message sending', () => {
   test('links an errored AI message to its regenerated replacement', async () => {
     const failedTurn = {
       ...existingTurn,
+      user: {
+        ...existingTurn.user,
+        alternativeModels: [
+          { rank: 1, model: 'failed-model' },
+          { rank: 2, model: 'fallback-model' },
+        ],
+      },
       ai: {
         ...existingTurn.ai,
         message: 'Having trouble connecting...',
         messageId: 'ai-failed',
         prevMessageId: 'ai-before-failed',
+        model: 'failed-model',
         error: true,
       },
     };
@@ -403,7 +496,7 @@ describe('chat message sending', () => {
         ...failedTurn.ai,
         message: 'Recovered answer',
         messageId: 'ai-recovered',
-        prevMessageId: 'ai-failed',
+        prevMessageId: 'ai-before-failed',
         error: false,
       },
     };
@@ -427,7 +520,10 @@ describe('chat message sending', () => {
           setSkipPageFetch={vi.fn()}
           newChat={false}
           sessionId={session.id}
-          catalogDict={{}}
+          catalogDict={{
+            'failed-model': 'Failed model',
+            'fallback-model': 'Fallback model',
+          }}
           trainingState={false}
           setTrainingState={vi.fn()}
           modelLabelsById={{}}
@@ -437,13 +533,16 @@ describe('chat message sending', () => {
 
     await screen.findByText('Having trouble connecting...');
     fireEvent.click(screen.getByRole('button', { name: 'Try again...' }));
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
 
     await waitFor(() => {
       expect(apiMocks.sendChatTurnServer).toHaveBeenCalledOnce();
     });
     expect(
       apiMocks.sendChatTurnServer.mock.calls[0][1].ai.prevMessageId,
-    ).toBe('ai-failed');
+    ).toBe('ai-before-failed');
+    expect(apiMocks.sendChatTurnServer.mock.calls[0][5]).toBeNull();
+    expect(apiMocks.sendChatTurnServer.mock.calls[0][6]).toBe(true);
     expect(await screen.findByText('Recovered answer')).toBeInTheDocument();
   });
 
@@ -533,7 +632,7 @@ describe('chat message sending', () => {
   });
 
   test('uses rankings stored on user data in the final turn', async () => {
-    apiMocks.sendChatTurnServer.mockResolvedValue(
+    apiMocks.sendChatTurnServer.mockImplementation(() => Promise.resolve(
       streamedResponse({
         type: 'final',
         content: {
@@ -558,7 +657,7 @@ describe('chat message sending', () => {
           },
         },
       }),
-    );
+    ));
 
     render(
       <MemoryRouter>
@@ -666,7 +765,9 @@ describe('chat message sending', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Stop generating' }));
 
-    expect(await screen.findByText('Response stopped.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Message generation stopped.'),
+    ).toBeInTheDocument();
     expect(signal.aborted).toBe(true);
     expect(cancelStream).toHaveBeenCalledOnce();
     expect(screen.queryByText('Having trouble connecting...')).not.toBeInTheDocument();
@@ -775,5 +876,232 @@ describe('chat message sending', () => {
     expect(screen.queryByText('First partial answer')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Continue response' }))
       .not.toBeInTheDocument();
+  });
+
+  test('prevents calling the backend before session initialization', async () => {
+    render(
+      <MemoryRouter>
+        <Chat
+          setSuccessMessage={vi.fn()}
+          setErrorMessage={vi.fn()}
+          session={null}
+          setSessions={vi.fn()}
+          skipPageFetch={false}
+          setSkipPageFetch={vi.fn()}
+          newChat={false}
+          sessionId={null}
+          catalogDict={{}}
+          trainingState={false}
+          setTrainingState={vi.fn()}
+          modelLabelsById={{}}
+        />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Sent before startup completes' },
+    });
+    const sendButton = screen.getByRole('button', { name: 'Send message' });
+
+    expect(sendButton).toBeDisabled();
+    fireEvent.click(sendButton);
+    expect(apiMocks.sendChatTurnServer).not.toHaveBeenCalled();
+  });
+
+  test('keeps a persisted partial response when the final event is missing', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    apiMocks.fetchSessionServer.mockResolvedValue({
+      messages: [makeTurn(1), makeTurn(2, 'ai-1'), makeTurn(3, 'ai-2')],
+      lastKey: null,
+    });
+    apiMocks.sendChatTurnServer.mockResolvedValue(
+      streamedResponse({
+        type: 'partial',
+        content: {
+          format: 'blocks_v1',
+          blocks: [{ type: 'p', text: 'Persisted partial response', items: [] }],
+        },
+        turn: {
+          turnSeq: 4,
+          title: session.title,
+          user: {
+            message: 'Test a dropped final event',
+            messageId: 'user-4',
+            messageSeq: 1,
+            parentMessageId: 'ai-3',
+          },
+          ai: {
+            message: {
+              format: 'blocks_v1',
+              blocks: [
+                { type: 'p', text: 'Persisted partial response', items: [] },
+              ],
+            },
+            messageId: 'ai-4',
+            messageSeq: 1,
+            parentMessageId: 'user-4',
+            model: 'gpt-5-6-terra',
+          },
+        },
+        request: { total: 5, expires: 9_999_999_999 },
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <Chat
+          setSuccessMessage={vi.fn()}
+          setErrorMessage={vi.fn()}
+          session={session}
+          setSessions={vi.fn()}
+          skipPageFetch={false}
+          setSkipPageFetch={vi.fn()}
+          newChat={false}
+          sessionId={session.id}
+          catalogDict={{}}
+          trainingState={false}
+          setTrainingState={vi.fn()}
+          modelLabelsById={{}}
+        />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Answer 3');
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Test a dropped final event' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+
+    expect(await screen.findByText('Persisted partial response')).toBeInTheDocument();
+    expect(screen.queryByText('Having trouble connecting...')).not.toBeInTheDocument();
+  });
+
+  test('recovers a persisted response after the stream closes early', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const initialTurns = [makeTurn(1), makeTurn(2, 'ai-1'), makeTurn(3, 'ai-2')];
+    const recoveredTurn = {
+      turnSeq: 4,
+      title: session.title,
+      user: {
+        message: 'Recover this response',
+        messageId: '',
+        messageSeq: 1,
+        parentMessageId: 'ai-3',
+      },
+      ai: {
+        message: 'Recovered from persisted history',
+        messageId: 'ai-4',
+        messageSeq: 1,
+        parentMessageId: '',
+        model: 'gpt-5-6-terra',
+      },
+    };
+    apiMocks.fetchSessionServer
+      .mockResolvedValueOnce({ messages: initialTurns, lastKey: null })
+      .mockImplementationOnce(async () => {
+        const sentMessageId =
+          apiMocks.sendChatTurnServer.mock.calls[0][1].user.messageId;
+        return {
+          messages: [{
+            ...recoveredTurn,
+            user: { ...recoveredTurn.user, messageId: sentMessageId },
+            ai: { ...recoveredTurn.ai, parentMessageId: sentMessageId },
+          }],
+          lastKey: null,
+        };
+      });
+    apiMocks.sendChatTurnServer.mockResolvedValue(streamedResponse());
+
+    render(
+      <MemoryRouter>
+        <Chat
+          setSuccessMessage={vi.fn()}
+          setErrorMessage={vi.fn()}
+          session={session}
+          setSessions={vi.fn()}
+          skipPageFetch={false}
+          setSkipPageFetch={vi.fn()}
+          newChat={false}
+          sessionId={session.id}
+          catalogDict={{}}
+          trainingState={false}
+          setTrainingState={vi.fn()}
+          modelLabelsById={{}}
+        />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Answer 3');
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Recover this response' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+
+    expect(await screen.findByText('Recovered from persisted history'))
+      .toBeInTheDocument();
+    expect(apiMocks.fetchSessionServer).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Having trouble connecting...')).not.toBeInTheDocument();
+  });
+
+  test('handles status, heartbeat, and final events split across network chunks', async () => {
+    apiMocks.fetchSessionServer.mockResolvedValue({
+      messages: [makeTurn(1), makeTurn(2, 'ai-1'), makeTurn(3, 'ai-2')],
+      lastKey: null,
+    });
+    apiMocks.sendChatTurnServer.mockResolvedValue(
+      chunkedStreamResponse([
+        { type: 'status', content: 'Selecting Model' },
+        { type: 'heartbeat', stage: 'generating', elapsed: 15 },
+        {
+          type: 'final',
+          content: {
+            turnSeq: 4,
+            title: session.title,
+            user: {
+              message: 'Chunk the stream',
+              messageId: 'user-4',
+              messageSeq: 1,
+              parentMessageId: 'ai-3',
+            },
+            ai: {
+              message: 'Chunked response completed',
+              messageId: 'ai-4',
+              messageSeq: 1,
+              parentMessageId: 'user-4',
+            },
+          },
+        },
+      ]),
+    );
+
+    render(
+      <MemoryRouter>
+        <Chat
+          setSuccessMessage={vi.fn()}
+          setErrorMessage={vi.fn()}
+          session={session}
+          setSessions={vi.fn()}
+          skipPageFetch={false}
+          setSkipPageFetch={vi.fn()}
+          newChat={false}
+          sessionId={session.id}
+          catalogDict={{}}
+          trainingState={false}
+          setTrainingState={vi.fn()}
+          modelLabelsById={{}}
+        />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Answer 3');
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Chunk the stream' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+
+    expect(await screen.findByText('Chunked response completed'))
+      .toBeInTheDocument();
+    expect(screen.queryByText('Having trouble connecting...')).not.toBeInTheDocument();
   });
 });

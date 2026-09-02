@@ -12,7 +12,7 @@ import ErrorPopup from "../../components/status/errors/error";
 import "../authForm.css";
 
 export default function RegisterPage({ preEmail = "", preStep = "email" }) {
-  const { code = null } = useParams();
+  const { code = "public" } = useParams();
 
   const { authenticated, loading, error: authError } = useUserID();
 

@@ -321,6 +321,7 @@ export default function ChatLayout() {
         trainingState={trainingState}
         setTrainingState={setTrainingState}
         modelLabelsById={modelLabelsById}
+        chatReady={accountLoaded && sessionLoaded}
       />
     </div>
   );

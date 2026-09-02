@@ -1,9 +1,10 @@
 import React from 'react';
-// import { ArrowDown } from 'lucide-react';
-// import Demo from './demo/layout';
+import { useNavigate } from "react-router-dom";
 import './home.css';
 
 export default function Home() {
+  const navigate = useNavigate();
+
   function FadeWords({ text, delay = 0 }) {
     const words = text.split(' ');
 
@@ -37,6 +38,10 @@ export default function Home() {
     );
   }
 
+  function toRegisterPage() {
+    navigate('/register', { replace: true });
+  }
+
   return (
     <div className="home">
       <section className="page-segment">
@@ -59,6 +64,9 @@ export default function Home() {
                 delay={1.1}
               />
             </p>
+          </div>
+          <div className="hero-actions">
+            <button className="primary-btn" onClick={toRegisterPage}>Get Started</button>
           </div>
         </div>
     

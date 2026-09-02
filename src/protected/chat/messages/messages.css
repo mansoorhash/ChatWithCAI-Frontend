@@ -25,6 +25,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
+  scroll-margin-top: 20px;
 }
 
 .chat-msg.user.editing-target {

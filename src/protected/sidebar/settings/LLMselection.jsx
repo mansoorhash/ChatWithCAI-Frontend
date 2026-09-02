@@ -186,6 +186,7 @@ export default function LLMselection({ catalog }) {
   };
 
   const handleSelectTier = (value) => {
+    setEnabledMap(initialEnabledMap);
     setSelected(value);
     setOpen(false);
     if (buttonRef.current) buttonRef.current.focus();

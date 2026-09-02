@@ -156,6 +156,7 @@
 
 .chat-input-bar.editing {
   padding-top: 8px;
+  border-color: var(--accent);
 }
 
 .edit-inline-label {
@@ -242,7 +243,7 @@
 }
 
 .chat-input-bar .chat-send.chat-send-stop {
-  background-color: 40% var(--accent);
+  background-color: var(--accent);
   color: var(--switch-knob);
   border-radius: 50%;
 }
@@ -250,7 +251,7 @@
 .chat-input-bar .chat-send.chat-send-stop:hover {
   background-color: color-mix(
     in srgb,
-    var(--accent) 80%,
+    var(--accent-hover) 80%,
     transparent
   );
   color: var(--switch-knob);

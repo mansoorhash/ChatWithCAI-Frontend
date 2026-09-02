@@ -6,6 +6,7 @@ import {
   ThumbsDown,
   RotateCcw,
   X,
+  LucideEdit2,
 } from "lucide-react";
 import blocksToText from "./utils/blockToText";
 import copyToClipboard from "./utils/copyToClipboard";
@@ -15,7 +16,9 @@ import { updateMessageReview } from "../../../api/chat/message";
 
 export default function MessageActions({
     data,
+    turnIndex = null,
     speaker,
+    messageProcessing,
     sessionId,
     catalogDict,
     messageError,
@@ -24,12 +27,16 @@ export default function MessageActions({
     regenerate,
     showFeedbackPrompt = false,
     dismissFeedbackPrompt,
+    editedTurn = null,
+    setEditedTurn = () => {},
+    setEditValue = () => {},
 }) {
     const { accessToken, updateAccessToken } = useUserID();
     const [isCopied, setIsCopied] = useState(false);
     const [review, setReview] = useState(data.review ?? null);
     const [showRegenerateMenu, setShowRegenerateMenu] = useState(false);
     const regenerateMenuRef = useRef(null);
+    const editLockRef = useRef(false);
 
     const rankedModels = (Array.isArray(regenerationOptions)
         ? regenerationOptions
@@ -57,7 +64,9 @@ export default function MessageActions({
 
     const alternativeModels = rankedModels
         .filter((option) => option.modelId !== data?.model);
-    const hasAlternativeModels = alternativeModels.length > 0;
+    const failedMessage = data?.error === true;
+    const hasAlternativeModels =
+        !failedMessage && alternativeModels.length > 0;
 
     useEffect(() => {
         if (!showRegenerateMenu) return undefined;
@@ -133,6 +142,22 @@ export default function MessageActions({
     const onCopy = async () => {
         await handleCopy(data.message);
     }
+
+    const handleEdit = (index) => {
+        if (messageProcessing || editLockRef.current) return;
+        if (editedTurn === index) return;
+        const userText = data?.message;
+        if (!userText) return;
+
+        editLockRef.current = true;
+
+        setEditedTurn(index);
+        setEditValue(userText);
+
+        requestAnimationFrame(() => {
+            editLockRef.current = false;
+        });
+    };
     return (
       <>
         {speaker === "ai" && showFeedbackPrompt && review === null && (
@@ -152,43 +177,56 @@ export default function MessageActions({
             <div className="message-actions">
                 {!messageError ? (
                     <>
-                    <button type="button" disabled={isCopied} className="ds-icon tooltip-wrapper" onClick={onCopy}>
-                        {isCopied ? 
-                            <CopyCheck size={16}/> : <Copy size={16}/>  
+                        <button type="button" disabled={isCopied} className="ds-icon tooltip-wrapper" onClick={onCopy}>
+                            {isCopied ?
+                                <CopyCheck size={16}/> : <Copy size={16}/>
+                            }
+                            <span className="ds-tooltip">{isCopied ? "Copied" : "Copy"}</span>
+                        </button>
+
+                        {speaker === "user" &&
+                        <>
+                            <button
+                                className="ds-icon tooltip-wrapper"
+                                onClick={() => handleEdit(turnIndex)}
+                                onMouseDown={(e) => e.preventDefault()}
+                                disabled={messageProcessing}
+                            >
+                                <LucideEdit2 size={16} />
+                                <span className="ds-tooltip">Edit</span>
+                            </button>
+                        </>
                         }
-                        <span className="ds-tooltip">{isCopied ? "Copied" : "Copy"}</span>
-                    </button>
 
-                    {speaker === "ai" ? 
-                    <>
-                        <button
-                            type="button"
-                            className="ds-icon tooltip-wrapper"
-                            aria-pressed={review === 'like'}
-                            onClick={() => onReview('like')}
-                        >
-                            <ThumbsUp
-                                size={16}
-                                fill={review === 'like' ? 'currentColor' : 'none'}
-                            />
-                            <span className="ds-tooltip">Like</span>
-                        </button>
+                        {speaker === "ai" &&
+                        <>
+                            <button
+                                type="button"
+                                className="ds-icon tooltip-wrapper"
+                                aria-pressed={review === 'like'}
+                                onClick={() => onReview('like')}
+                            >
+                                <ThumbsUp
+                                    size={16}
+                                    fill={review === 'like' ? 'currentColor' : 'none'}
+                                />
+                                <span className="ds-tooltip">Like</span>
+                            </button>
 
-                        <button
-                            type="button"
-                            className="ds-icon tooltip-wrapper"
-                            aria-pressed={review === 'dislike'}
-                            onClick={() => onReview('dislike')}
-                        >
-                            <ThumbsDown
-                                size={16}
-                                fill={review === 'dislike' ? 'currentColor' : 'none'}
-                            />
-                            <span className="ds-tooltip">Dislike</span>
-                        </button>
-                    </>
-                    : null
-                    }
+                            <button
+                                type="button"
+                                className="ds-icon tooltip-wrapper"
+                                aria-pressed={review === 'dislike'}
+                                onClick={() => onReview('dislike')}
+                            >
+                                <ThumbsDown
+                                    size={16}
+                                    fill={review === 'dislike' ? 'currentColor' : 'none'}
+                                />
+                                <span className="ds-tooltip">Dislike</span>
+                            </button>
+                        </>
+                        }
                     </>
                 ): null}
                 {speaker ==="ai" &&
@@ -198,7 +236,9 @@ export default function MessageActions({
                         className="ds-icon tooltip-wrapper"
                         onClick={() => {
                             if (!hasAlternativeModels) {
-                                onRegenerate(currentModelRank);
+                                onRegenerate(
+                                    failedMessage ? null : currentModelRank
+                                );
                                 return;
                             }
                             setShowRegenerateMenu((open) => !open);

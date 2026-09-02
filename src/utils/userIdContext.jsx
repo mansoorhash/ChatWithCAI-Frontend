@@ -72,6 +72,7 @@ export function UserIdProvider({ children }) {
       setAuthed(false);
       setUserID(null);
       setErr(e?.message || String(e));
+      handleLogout();
     } finally {
       localStorage.setItem('user_state', userState)
       if (myReq === reqIdRef.current) setLoading(false);

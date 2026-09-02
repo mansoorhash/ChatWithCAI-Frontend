@@ -7,6 +7,9 @@ import { ChevronsDown } from "lucide-react";
 function Messages({
   turns,
   editedTurn,
+  setEditedTurn,
+  editValue,
+  setEditValue,
   sessionId,
   catalogDict,
   messageProcessing,
@@ -27,15 +30,26 @@ function Messages({
         <React.Fragment key={i}>
           {/* USER MESSAGE */}
           {t?.user?.message && (
-            <div className={`chat-msg user ${editedTurn === i ? 'editing-target' : ''}`}>
+            <div 
+              key={t.turnSeq}
+              id={`turn-${t.turnSeq}`}
+              data-turn={t.turnSeq}
+              className={`chat-msg user ${editedTurn === i ? 'editing-target' : ''}`}
+            >
               <MessageRender
                 speaker="user"
                 data={t.user}
               />
               <MessageActions
                 speaker="user"
+                messageProcessing={messageProcessing}
                 data={t.user}
+                turnIndex={i}
                 sessionId={sessionId}
+                editedTurn={editedTurn}
+                setEditedTurn={setEditedTurn}
+                editValue={editValue}
+                setEditValue={setEditValue}
               />
             </div>
           )}
