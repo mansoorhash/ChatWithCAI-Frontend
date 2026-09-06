@@ -131,7 +131,6 @@
 .usage-months-grid {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: repeat(3, minmax(112px, auto));
@@ -209,12 +208,11 @@
 @media (max-width: 768px) {
 
   .usage-container {
-    width: calc(100dvw - 24px);
+    width: calc(100dvw - 48px);
     height: 100%;
     height: calc(100vh - 48px);
     height: calc(100dvh - 48px);
 
-    box-sizing: border-box;
   }
 
   .usage-subheader {
@@ -243,13 +241,11 @@
   }
 
   .usage-months-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(1, minmax(0, 100%));
     grid-template-rows: none;
     grid-auto-rows: minmax(105px, auto);
     gap: 10px;
-    padding: 10px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    padding: 5px;
   }
 
   .usage-month-cell {

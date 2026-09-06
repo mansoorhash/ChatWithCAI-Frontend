@@ -1,0 +1,121 @@
+.chat-attachment-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-self: center;
+    width: calc(100% - 32px);
+    box-sizing: border-box;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.chat-file-card {
+    display: flex;
+    align-items: center;
+    width: min(230px, 100%);
+    min-width: 0;
+    min-height: 54px;
+    box-sizing: border-box;
+    gap: 9px;
+    padding: 8px 9px;
+    color: var(--text);
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 13px;
+    box-shadow: 0 1px 4px var(--shadow);
+}
+
+.chat-file-card.failed {
+    border-color: color-mix(
+        in srgb,
+        var(--danger) 45%,
+        var(--input-border)
+    );
+}
+
+.chat-file-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 35px;
+    width: 35px;
+    height: 35px;
+    color: var(--text-2);
+    background-color: var(--hover);
+    border-radius: 9px;
+}
+
+.chat-file-information {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    gap: 3px;
+}
+
+.chat-file-name {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-file-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 14px;
+}
+
+.chat-file-card.ready .chat-file-status {
+    color: var(--accent);
+}
+
+.chat-file-card.failed .chat-file-status {
+    color: var(--danger);
+}
+
+.chat-file-spinner {
+    animation: chat-file-spin 0.8s linear infinite;
+}
+
+.chat-file-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.chat-file-remove:hover:not(:disabled) {
+    color: var(--text);
+    background-color: var(--hover);
+}
+
+.chat-file-remove:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+}
+
+@keyframes chat-file-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-file-card {
+        width: 100%;
+    }
+}

@@ -5,44 +5,20 @@ import { fetchSessionServer } from '../../api/chat/session';
 import SpinnerRounded from '../../components/loading';
 import Messages from './messages/messages';
 import {v4 as uuidv4} from "uuid";
-import {
-  ArrowUp,
-  Square,
-} from 'lucide-react';
 import './chat.css';
 import { useUserID } from '../../utils/userIdContext';
 import {
   continueChatMessageServer,
   sendChatTurnServer,
 } from '../../api/chat/message';
-import ChatModelTraining from './components/modelTraining';
 import { CHAT_TOTALCOUNT, CHAT_EXPIRATION } from '../../utils/constants';
 import TurnNavigator from './components/turns/navigator';
+import ChatInput from './input/layout';
+import useChatLimits from './input/useChatLimits';
 
 const FEEDBACK_PROMPT_CHANCE = 0.2;
 const FEEDBACK_PROMPT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const FEEDBACK_PROMPT_LAST_SHOWN = 'chat_feedback_prompt_last_shown';
-const CHAT_LIMIT_STORAGE_SYNC_MS = 1000;
-
-function readStoredChatLimits() {
-  const storedTotal = localStorage.getItem(CHAT_TOTALCOUNT);
-  const parsedTotal = Number(storedTotal);
-  const total =
-    storedTotal !== null && Number.isFinite(parsedTotal) && parsedTotal >= 0
-      ? Math.trunc(parsedTotal)
-      : 0;
-
-  const storedExpiration = localStorage.getItem(CHAT_EXPIRATION);
-  const parsedExpiration = Number(storedExpiration);
-  const expiration =
-    storedExpiration !== null &&
-    Number.isFinite(parsedExpiration) &&
-    parsedExpiration > 0
-      ? parsedExpiration
-      : null;
-
-  return { total, expiration };
-}
 
 export function shouldRequestFeedback(
   now = Date.now(),
@@ -99,24 +75,24 @@ export default function Chat({
   setTrainingState,
   modelLabelsById,
   chatReady = true,
+  onNewChat,
 }) {
   const { accessToken, updateAccessToken } = useUserID();
   const scrollRef = useRef(null);
   const navigate = useNavigate();
   const showTrainingChoice = trainingState === null;
 
-  const [input, setInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [messageLoading, setMessageLoading] = useState(false);
   const [messageProcessing, setMessageProcessing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [feedbackPromptTurnSeq, setFeedbackPromptTurnSeq] = useState(null);
-  const [chatTotalCount, setTotalCount] = useState(
-    () => readStoredChatLimits().total
-  );
-  const [chatExpiration, setChatExpiration] = useState(
-    () => readStoredChatLimits().expiration
-  );
+  const {
+    chatExpiration,
+    chatTotalCount,
+    setChatExpiration,
+    setChatTotalCount: setTotalCount,
+  } = useChatLimits();
   const initialScrollRef = useRef(false);
 
   // Now this is turns (backend-native)
@@ -130,8 +106,6 @@ export default function Chat({
   const [activeTurn, setActiveTurn] = useState(null);
   const [editedTurn, setEditedTurn] = useState(null);
   const [editValue, setEditValue] = useState('');
-  const editInputRef = useRef(null);
-  const activeText = editedTurn !== null ? editValue : input;
 
   // Pagination cursor (LastEvaluatedKey)
   const cursorRef = useRef(null);
@@ -141,6 +115,9 @@ export default function Chat({
   const messageAbortRef = useRef(null);
   const messageReaderRef = useRef(null);
 
+  // Attachments
+  const [attachments, setAttachments] = useState([]);
+
   useEffect(() => {
     turnsRef.current = turns;
   }, [turns]);
@@ -148,7 +125,6 @@ export default function Chat({
   // Fetch turns when session changes
   useEffect(() => {
     setChatLoading(true);
-    setInput('')
 
     // reset pagination on session change
     cursorRef.current = null;
@@ -159,6 +135,7 @@ export default function Chat({
     setEditedTurn(null);
     setEditValue('');
     setFeedbackPromptTurnSeq(null);
+    setAttachments([]);
     if (!session) {
       setTurns([]);
       setChatLoading(false);
@@ -233,129 +210,6 @@ export default function Chat({
       setEditValue(turns[editedTurn].user.message);
     }
   }, [editedTurn, turns]);
-
-  useEffect(() => {
-    if (editedTurn === null) return;
-
-    const onDown = (e) => {
-      const bar = document.querySelector(".chat-input-bar");
-      if (bar?.contains(e.target)) return
-
-      if (e.target.closest(".message-actions")) return;
-
-      setEditedTurn(null);
-      setEditValue('');
-    };
-
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [editedTurn]);
-
-  useEffect(() => {
-    if (editedTurn !== null && editInputRef.current) {
-      requestAnimationFrame(() => {
-        const el = editInputRef.current;
-        el.focus();
-        const n = el.value.length;
-        el.setSelectionRange(n, n);
-      });
-    }
-  }, [editedTurn]);
-
-  useEffect(() => {
-    const el = editInputRef.current;
-    if (!el) return;
-
-    const max = parseInt(getComputedStyle(el).maxHeight, 10) || 240;
-
-    el.style.height = "auto";
-
-    const text = (editedTurn !== null ? editValue : input);
-    if (!text) {
-      el.style.overflowY = "hidden";
-      return;
-    }
-
-    const next = Math.min(el.scrollHeight, max);
-    el.style.height = `${next}px`;
-    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
-  }, [input, editValue, editedTurn, session?.id]);
-
-  useEffect(() => {
-    const syncStoredChatLimits = () => {
-      const { total, expiration } = readStoredChatLimits();
-      setTotalCount((current) => current === total ? current : total);
-      setChatExpiration((current) =>
-        current === expiration ? current : expiration
-      );
-    };
-
-    const handleStorage = (event) => {
-      if (
-        event.key !== null &&
-        event.key !== CHAT_TOTALCOUNT &&
-        event.key !== CHAT_EXPIRATION
-      ) {
-        return;
-      }
-      syncStoredChatLimits();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        syncStoredChatLimits();
-      }
-    };
-
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("focus", syncStoredChatLimits);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    const intervalId = window.setInterval(
-      syncStoredChatLimits,
-      CHAT_LIMIT_STORAGE_SYNC_MS
-    );
-
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("focus", syncStoredChatLimits);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.clearInterval(intervalId);
-    };
-  }, []);
-
-  useEffect(() => {
-    const expirationTimestamp = Number(chatExpiration);
-
-    if (
-      !Number.isFinite(expirationTimestamp) ||
-      expirationTimestamp <= 0
-    ) {
-      return;
-    }
-
-    const resetChatLimit = () => {
-      setChatExpiration(null);
-      setTotalCount(0);
-
-      localStorage.removeItem(CHAT_EXPIRATION);
-      localStorage.setItem(CHAT_TOTALCOUNT, "0");
-    };
-
-    const millisecondsRemaining =
-      expirationTimestamp * 1000 - Date.now();
-
-    if (millisecondsRemaining <= 0) {
-      resetChatLimit();
-      return;
-    }
-
-    const timeoutId = window.setTimeout(
-      resetChatLimit,
-      millisecondsRemaining
-    );
-
-    return () => window.clearTimeout(timeoutId);
-  }, [chatExpiration]);
 
   // Fetch page helper
   const fetchPage = async (cursor) => {
@@ -443,18 +297,22 @@ export default function Chat({
 
   // Send message function
   const sendMessage = async (
-    text = input.trim(),
+    text,
     turnSequence = null,
     regenerationRank = null,
     editingUserMessage = false,
   ) => {
+    const filesUploading = attachments.some(
+      (attachment) => attachment.status === 'uploading',
+    );
+
     if (
       !text ||
+      filesUploading ||
       messageLoading ||
       !chatReady ||
       (!newChat && !session?.id)
     ) return;
-    if (turnSequence === null) setInput('');
     setFeedbackPromptTurnSeq(null);
 
     const requestController = new AbortController();
@@ -511,6 +369,15 @@ export default function Chat({
       ? existingTurn.ai.prevMessageId || ""
       : existingTurn?.ai?.messageId || "";
 
+    const messageAttachments = attachments
+      .filter((attachment) => attachment.status === 'ready' && attachment.sessionId === session.id)
+      .map((attachment) => ({
+        fileId: attachment.fileId,
+        name: attachment.name,
+        mimeType: attachment.mimeType,
+        sizeBytes: attachment.sizeBytes,
+    }));
+
     const userMessage = editingUserMessage
       ? {
           message: text,
@@ -521,12 +388,14 @@ export default function Chat({
               0) + 1,
           parentMessageId: existingTurn?.user?.parentMessageId || "#ROOT",
           prevMessageId: existingTurn?.user?.messageId || "",
+          attachments: existingTurn?.user?.attachments ?? [],
         }
       : existingTurn?.user ?? {
           message: text,
           messageId,
           messageSeq: 1,
           parentMessageId: lastTurn?.ai.messageId || "#ROOT",
+          attachments: messageAttachments,
         };
 
     const newTurn = {
@@ -753,7 +622,9 @@ export default function Chat({
               finalTurn?.turnSeq ?? newTurn.turnSeq,
             );
           }
-
+          if (!existingTurn) {
+            setAttachments([]);
+          }
           contentChanged = true;
         }
 
@@ -936,7 +807,6 @@ export default function Chat({
         setMessageProcessing(false);
         setMessageLoading(false);
       }
-
       hasLoadedOnceRef.current = true;
     }
   };
@@ -1112,18 +982,6 @@ export default function Chat({
     await sendMessage(editedMessage, turn.turnSeq, null, true);
   }
 
-  // Input keydown handler
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (editedTurn !== null) {
-        editMessage(editedTurn);
-      } else {
-        sendMessage();
-      }
-    }
-  };
-
   const scrollToTurn = (turnSeq) => {
     document
       .getElementById(`turn-${turnSeq}`)
@@ -1134,36 +992,6 @@ export default function Chat({
     setActiveTurn(turnSeq);
   };
 
-  const focusMessageInput = (event) => {
-    if (event.target.closest("button, a")) return;
-    editInputRef.current?.focus();
-  };
-
-  const CHAT_MESSAGE_LIMIT = 20;
-
-  const totalMessagesUsed = Number(chatTotalCount) || 0;
-  const messagesRemaining = Math.max(
-    CHAT_MESSAGE_LIMIT - totalMessagesUsed,
-    0
-  );
-  const expirationTimestamp = Number(chatExpiration);
-  const resetDate =
-    Number.isFinite(expirationTimestamp) &&
-    expirationTimestamp > 0
-      ? new Date(expirationTimestamp * 1000)
-      : null;
-
-  const resetLabel =
-    resetDate && !Number.isNaN(resetDate.getTime())
-      ? resetDate.toLocaleString([], {
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-        })
-      : null;
-
-  const showMessageReminder = messagesRemaining <= 8;
   return (
     <div className="chat-container">
       <ChatHeader session={session} chatLoading={chatLoading} />
@@ -1219,112 +1047,30 @@ export default function Chat({
           />
         )}
       </div>
-      <div className="chat-input-wrapper">
-        {!showTrainingChoice && showMessageReminder && (
-          <div
-            className={`chat-limit-status ${
-              messagesRemaining === 0 ? "limit-reached" : ""
-            }`}
-            role="status"
-          >
-            {messagesRemaining === 0 ? (
-              <>
-                You've reached your message limit.
-                {resetLabel && (
-                  <> You can send more messages after <strong>{resetLabel}</strong>.</>
-                )}
-              </>
-            ) : (
-              <>
-                You have{" "}
-                <strong>
-                  {messagesRemaining} message
-                  {messagesRemaining === 1 ? "" : "s"} left
-                </strong>
-                {resetLabel && (
-                  <>. Your limit resets <strong>{resetLabel}</strong></>
-                )}
-                .
-              </>
-            )}
-          </div>
-        )}
-
-        <div
-          className={`chat-input-bar ${
-            showTrainingChoice ? "training" : ""
-          } ${editedTurn !== null ? "editing" : ""}`}
-          role="group"
-          aria-label="Message composer"
-          onPointerDown={focusMessageInput}
-        >
-          {editedTurn !== null && (
-            <div className="edit-inline-label">Editing…</div>
-          )}
-
-          {showTrainingChoice ? (
-            <ChatModelTraining
-              setTrainingState={setTrainingState}
-              setErrorMessage={setErrorMessage}
-              setSuccessMessage={setSuccessMessage}
-            />
-          ) : (
-            <div className="chat-input-row">
-              <textarea
-                ref={editInputRef}
-                className="chat-input scrollbar-custom"
-                value={editedTurn !== null ? editValue : input}
-                onKeyDown={handleKeyDown}
-                onChange={(e) =>
-                  editedTurn !== null
-                    ? setEditValue(e.target.value)
-                    : setInput(e.target.value)
-                }
-                rows={1}
-                placeholder={!hasSelectedSession ? "What shall we work on today?" : "How can I help..."}
-              />
-              <div className="chat-input-actions">
-                {messageLoading ? (
-                  <button
-                    type="button"
-                    className="chat-send chat-send-stop"
-                    onClick={stopMessage}
-                    aria-label="Stop generating"
-                  >
-                    <Square
-                      size={15}
-                      strokeWidth={2}
-                      fill="currentColor"
-                      aria-hidden="true"
-                    />
-                    <span className="chat-send-text">Stop</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="chat-send"
-                    onClick={
-                      editedTurn !== null
-                        ? () => editMessage(editedTurn)
-                        : () => sendMessage()
-                    }
-                    disabled={
-                      messageLoading ||
-                      !chatReady ||
-                      (!newChat && !session?.id) ||
-                      !activeText.trim()
-                    }
-                    aria-label="Send message"
-                  >
-                    <ArrowUp size={18} strokeWidth={2.5} aria-hidden="true" />
-                    <span className="chat-send-text">Send</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <ChatInput
+        chatExpiration={chatExpiration}
+        chatReady={chatReady}
+        chatTotalCount={chatTotalCount}
+        canSendToSession={Boolean(session?.id)}
+        editValue={editValue}
+        editedTurn={editedTurn}
+        hasSelectedSession={hasSelectedSession}
+        messageLoading={messageLoading}
+        newChat={newChat}
+        onEditMessage={editMessage}
+        onSendMessage={sendMessage}
+        onStopMessage={stopMessage}
+        sessionId={sessionId}
+        setEditValue={setEditValue}
+        setEditedTurn={setEditedTurn}
+        setErrorMessage={setErrorMessage}
+        setSuccessMessage={setSuccessMessage}
+        setTrainingState={setTrainingState}
+        showTrainingChoice={showTrainingChoice}
+        attachments={attachments}
+        setAttachments={setAttachments}
+        onCreateSession={onNewChat}
+      />
       </div>
       <div className="chat-footer">
           <span>

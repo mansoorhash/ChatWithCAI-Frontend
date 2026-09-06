@@ -222,7 +222,7 @@ export default function Usage({ onClose, modelLabelsById }) {
                   {top3.map(([model, req], idx) => (
                     <li key={model}>
                       <span className="usage-rank">#{idx + 1}</span>
-                      <span className="usage-model">{modelLabelsById[model]}</span>
+                      <span className="usage-model">{modelLabelsById[model] ?? model}</span>
                       <span className="usage-pct">{pct(req, total)}</span>
                     </li>
                   ))}
