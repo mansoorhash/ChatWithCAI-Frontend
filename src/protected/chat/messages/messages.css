@@ -15,6 +15,18 @@
   background-color: var(--error-bg);
 }
 
+.chat-msg.user.attachment-message {
+  padding: 0;
+  margin-bottom: -8px;
+  background: transparent;
+  width: 100%;
+  max-width: 100%;
+}
+
+.chat-msg.stopped {
+  color: var(--danger);
+}
+
 /* User bubble */
 .chat-msg.user {
   background-color: var(--user-bubble);

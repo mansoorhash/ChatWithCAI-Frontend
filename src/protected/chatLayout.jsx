@@ -241,25 +241,48 @@ export default function ChatLayout() {
       setNewChat(false)
     } else {
       handleNewChat();
-      setNewChat(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, sessionLoaded]);
 
   const handleNewChat = async () => {
-
     const existingDraft = sessions.find((s) => s.draft);
     if (existingDraft) {
-      setSessionId(null);
+      setSessionId(existingDraft.id);
+      setNewChat(true);
       navigate("/chat", {replace:true});
       return existingDraft
     }
     const newId = uuidv4();
     const newSession = { id: newId, title: 'New Chat', lastUpdate: null, draft: true};
     setSessions((prev) => [newSession, ...prev]);
-    setSessionId(null);
+    setSessionId(newId);
+    setNewChat(true);
     navigate("/chat", {replace:true});
     return newSession
+  };
+
+  const handlePromoteSession = async (draftSession) => {
+    if (!draftSession?.id) return null;
+
+    const promotedSession = {
+      ...draftSession,
+      title: "Untitled",
+      lastUpdated: new Date().toISOString(),
+      draft: false,
+    };
+
+    setSessions((prev) =>
+      prev.map((storedSession) =>
+        storedSession.id === promotedSession.id
+          ? { ...storedSession, ...promotedSession }
+          : storedSession
+      )
+    );
+    setSessionId(promotedSession.id);
+    setNewChat(false);
+    navigate(`/chat/${promotedSession.id}`, { replace: true });
+    return promotedSession;
   };
 
   const currentSession = useMemo(() => {
@@ -323,6 +346,7 @@ export default function ChatLayout() {
         modelLabelsById={modelLabelsById}
         chatReady={accountLoaded && sessionLoaded}
         onNewChat={handleNewChat}
+        onPromoteSession={handlePromoteSession}
       />
     </div>
   );

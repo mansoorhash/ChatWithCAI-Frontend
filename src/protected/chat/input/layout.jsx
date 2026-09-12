@@ -10,8 +10,12 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-react';
+import {v4 as uuidv4} from "uuid";
 import ChatModelTraining from '../components/modelTraining';
-import { uploadSessionFileServer } from '../../../api/chat/files';
+import {
+  deleteSessionFileServer,
+  uploadSessionFileServer,
+} from '../../../api/chat/files';
 import { useUserID } from '../../../utils/userIdContext';
 import './layout.css';
 import './attachments.css'
@@ -57,7 +61,6 @@ function ChatInput({
     editedTurn,
     hasSelectedSession,
     messageLoading,
-    newChat,
     onEditMessage,
     onSendMessage,
     onStopMessage,
@@ -84,16 +87,17 @@ function ChatInput({
     );
     const resetLabel = formatResetLabel(chatExpiration);
     const showMessageReminder = messagesRemaining <= CHAT_LIMIT_REMINDER_THRESHOLD;
-    const filesUploading = attachments.some(
-        (attachment) => attachment.status === "uploading",
+    const filesBusy = attachments.some(
+        (attachment) =>
+          attachment.status === "uploading" ||
+          attachment.status === "deleting",
     );
     const sendDisabled =
         messageLoading ||
-        filesUploading ||
+        filesBusy ||
         !chatReady ||
-        (!newChat && !canSendToSession) ||
+        !canSendToSession ||
         !activeText.trim();
-
 
     const attachmentRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -180,14 +184,6 @@ function ChatInput({
         element.scrollHeight > maxHeight ? 'auto' : 'hidden';
     }, [activeText, sessionId]);
 
-    useEffect(() => {
-        setAttachments((current) =>
-            current.filter(
-            (attachment) => attachment.sessionId === sessionId,
-            ),
-        );
-    }, [sessionId, setAttachments]);
-
     const submitMessage = () => {
         if (sendDisabled) return;
 
@@ -224,14 +220,61 @@ function ChatInput({
         }
     };
 
-    const removeAttachment = (attachmentKey) => {
+    const removeAttachment = async (attachmentKey) => {
+        const attachment = attachments.find(
+            (item) => (item.localId || item.fileId) === attachmentKey,
+        );
+
+        if (!attachment || attachment.status === 'deleting') return;
+
+        if (!attachment.fileId) {
+            setAttachments((current) =>
+                current.filter(
+                    (item) => (item.localId || item.fileId) !== attachmentKey,
+                ),
+            );
+            return;
+        }
+
         setAttachments((current) =>
-            current.filter(
-            (attachment) =>
-                (attachment.localId || attachment.fileId) !==
-                attachmentKey,
+            current.map((item) =>
+                (item.localId || item.fileId) === attachmentKey
+                    ? { ...item, status: 'deleting', error: null }
+                    : item,
             ),
         );
+
+        try {
+            const result = await deleteSessionFileServer(
+                attachment.sessionId,
+                attachment.fileId,
+                accessToken,
+                updateAccessToken,
+            );
+
+            if (result?.unauthorized) {
+                throw new Error('Authentication required.');
+            }
+
+            setAttachments((current) =>
+                current.filter(
+                    (item) => (item.localId || item.fileId) !== attachmentKey,
+                ),
+            );
+        } catch (error) {
+            const message =
+                error?.body?.detail?.message ||
+                error?.message ||
+                'The attachment could not be removed.';
+            setErrorMessage(message);
+            setAttachments((current) =>
+                current.map((item) =>
+                    (item.localId || item.fileId) === attachmentKey
+                        ? { ...item, status: 'failed', error: message }
+                        : item,
+                ),
+            );
+        }
     };
 
     const uploadSelectedFiles = async (selectedFiles) => {
@@ -262,7 +305,7 @@ function ChatInput({
         }
 
         const pendingAttachments = filesToUpload.map((file) => ({
-            localId: crypto.randomUUID(),
+            localId: uuidv4(),
             sessionId: targetSessionId,
             file,
             fileId: null,
@@ -270,6 +313,7 @@ function ChatInput({
             mimeType: file.type,
             sizeBytes: file.size,
             status: 'uploading',
+            progress: 0,
             error: null,
         }));
 
@@ -282,14 +326,30 @@ function ChatInput({
             pendingAttachments.map(async (attachment) => {
             try {
                 const uploaded = await uploadSessionFileServer(
+                hasSelectedSession,
                 targetSessionId,
                 attachment.file,
                 accessToken,
                 updateAccessToken,
+                (progress) => {
+                    setAttachments((current) =>
+                    current.map((item) =>
+                        item.localId === attachment.localId
+                        ? { ...item, progress }
+                        : item,
+                    ),
+                    );
+                },
                 );
 
                 if (uploaded?.unauthorized) {
                 throw new Error('Authentication required.');
+                }
+
+                if (!uploaded?.fileId) {
+                throw new Error(
+                    uploaded?.message || 'Invalid upload response.'
+                );
                 }
 
                 setAttachments((current) =>
@@ -303,26 +363,40 @@ function ChatInput({
                         mimeType: uploaded.mimeType,
                         sizeBytes: uploaded.sizeBytes,
                         status: 'ready',
+                        progress: 100,
                         error: null,
                         }
                     : item,
                 ),
                 );
             } catch (error) {
+                const message =
+                    error?.message || "The file could not be uploaded.";
+
+                setErrorMessage(message);
+
+                if (error?.status === 413) {
+                    setAttachments((current) =>
+                    current.filter(
+                        (item) => item.localId !== attachment.localId
+                    )
+                    );
+
+                    return;
+                }
+
                 setAttachments((current) =>
-                current.map((item) =>
+                    current.map((item) =>
                     item.localId === attachment.localId
-                    ? {
-                        ...item,
-                        status: 'failed',
-                        error:
-                            error?.message ||
-                            'The file could not be uploaded.',
+                        ? {
+                            ...item,
+                            status: "failed",
+                            error: message,
                         }
-                    : item,
-                ),
+                        : item
+                    )
                 );
-            }
+                }
             }),
         );
     };
@@ -403,7 +477,7 @@ function ChatInput({
                                     className="chat-file-spinner"
                                     size={13}
                                 />
-                                Uploading…
+                                Uploading… {attachment.progress}%
                                 </>
                             )}
 
@@ -419,10 +493,20 @@ function ChatInput({
                                 </>
                             )}
 
+                            {attachment.status === 'deleting' && (
+                                <>
+                                <LoaderCircle
+                                    className="chat-file-spinner"
+                                    size={13}
+                                />
+                                Removing…
+                                </>
+                            )}
+
                             {attachment.status === 'failed' && (
                                 <>
                                 <TriangleAlert size={13} />
-                                Upload failed
+                                {attachment.error}
                                 </>
                             )}
                             </span>
@@ -432,7 +516,11 @@ function ChatInput({
                             type="button"
                             className="chat-file-remove"
                             onClick={() =>
-                            removeAttachment(attachmentKey)
+                            void removeAttachment(attachmentKey)
+                            }
+                            disabled={
+                                attachment.status === 'uploading' ||
+                                attachment.status === 'deleting'
                             }
                             aria-label={`Remove ${attachment.name}`}
                         >

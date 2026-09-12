@@ -35,7 +35,11 @@ export async function apiFetch(
     window.location.href("/");
     throw err;
   }
-  if (res.status === 401 && body?.detail?.code === 'EXPIRED_TOKEN' && retry) {
+  const tokenCanBeRefreshed =
+    body?.detail?.code === 'EXPIRED_TOKEN' ||
+    body?.detail?.code === 'INVALID_TOKEN';
+
+  if (res.status === 401 && tokenCanBeRefreshed && retry) {
     try {
 
       if (!refreshPromise) {

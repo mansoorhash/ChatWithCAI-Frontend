@@ -20,7 +20,7 @@ const FEEDBACK_PROMPT_CHANCE = 0.2;
 const FEEDBACK_PROMPT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const FEEDBACK_PROMPT_LAST_SHOWN = 'chat_feedback_prompt_last_shown';
 
-export function shouldRequestFeedback(
+function shouldRequestFeedback(
   now = Date.now(),
   random = Math.random,
 ) {
@@ -76,6 +76,7 @@ export default function Chat({
   modelLabelsById,
   chatReady = true,
   onNewChat,
+  onPromoteSession,
 }) {
   const { accessToken, updateAccessToken } = useUserID();
   const scrollRef = useRef(null);
@@ -100,7 +101,8 @@ export default function Chat({
   const turnsRef = useRef(turns);
   const hasTurns = turns.length > 0;
   const showTurnNavigator = turns.length > 2;
-  const hasSelectedSession = Boolean(sessionId);
+  
+  const hasSelectedSession = Boolean(turns.length);
 
   // Message States
   const [activeTurn, setActiveTurn] = useState(null);
@@ -135,7 +137,11 @@ export default function Chat({
     setEditedTurn(null);
     setEditValue('');
     setFeedbackPromptTurnSeq(null);
-    setAttachments([]);
+    setAttachments((current) =>
+      current.filter(
+        (attachment) => attachment.sessionId === session?.id
+      )
+    );
     if (!session) {
       setTurns([]);
       setChatLoading(false);
@@ -174,7 +180,6 @@ export default function Chat({
         if (!cancelled) setChatLoading(false);
       }
     })();
-
     return () => { cancelled = true; };
   }, [session?.id]);
 
@@ -269,20 +274,6 @@ export default function Chat({
     if (el.scrollTop <= thresholdPx) loadOlderTurns();
   };
 
-  // Send message handler
-  const handleNewChat = async () => {
-    
-    const newId = uuidv4();
-    const newSession = {
-      id: newId,
-      title: "Untitled",
-      lastUpdated: new Date().toISOString(),
-    };
-    setSessions(prev => prev.map(s => (s.draft ? newSession : s)));
-    navigate(`/chat/${newId}`, { replace: true });
-    return newSession;
-  };
-
   const stopMessage = () => {
     const controller = messageAbortRef.current;
     if (!controller || controller.signal.aborted) return;
@@ -311,7 +302,7 @@ export default function Chat({
       filesUploading ||
       messageLoading ||
       !chatReady ||
-      (!newChat && !session?.id)
+      !session?.id
     ) return;
     setFeedbackPromptTurnSeq(null);
 
@@ -331,8 +322,7 @@ export default function Chat({
     setTurns(turnsWithoutContinuations);
 
     if (newChat) {
-      setSkipPageFetch(true);
-      session = await handleNewChat(text);
+      session = await onPromoteSession?.(session);
     }
 
     const existingTurn =
@@ -370,7 +360,11 @@ export default function Chat({
       : existingTurn?.ai?.messageId || "";
 
     const messageAttachments = attachments
-      .filter((attachment) => attachment.status === 'ready' && attachment.sessionId === session.id)
+      .filter(
+        (attachment) =>
+          attachment.status === 'ready' &&
+          attachment.sessionId === session.id
+      )
       .map((attachment) => ({
         fileId: attachment.fileId,
         name: attachment.name,
@@ -441,6 +435,10 @@ export default function Chat({
         requestedRegenerationRank,
         regenerate,
       );
+
+      if (!existingTurn) {
+        setAttachments([]);
+      }
 
       if (res?.unauthorized) {
         setMessageLoading(false);
@@ -622,9 +620,6 @@ export default function Chat({
               finalTurn?.turnSeq ?? newTurn.turnSeq,
             );
           }
-          if (!existingTurn) {
-            setAttachments([]);
-          }
           contentChanged = true;
         }
 
@@ -721,7 +716,7 @@ export default function Chat({
                   ai: {
                     ...turn.ai,
                     ...(!receivedResponseContent
-                      ? { message: "Message generation stopped." }
+                      ? { message: "Cancelled", }
                       : {}),
                     stopped: true,
                   },
@@ -994,7 +989,9 @@ export default function Chat({
 
   return (
     <div className="chat-container">
-      <ChatHeader session={session} chatLoading={chatLoading} />
+      {hasSelectedSession &&
+        <ChatHeader session={session} chatLoading={chatLoading} />
+      }
       <div className={`chat-main ${hasSelectedSession ? "" : "no-session"}`}>
       <div
         className={`chat-box scrollbar-custom ${
@@ -1056,7 +1053,6 @@ export default function Chat({
         editedTurn={editedTurn}
         hasSelectedSession={hasSelectedSession}
         messageLoading={messageLoading}
-        newChat={newChat}
         onEditMessage={editMessage}
         onSendMessage={sendMessage}
         onStopMessage={stopMessage}

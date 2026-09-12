@@ -24,7 +24,7 @@ function parseNumberedItems(items) {
   return parsed.every(Boolean) ? parsed : null;
 }
 
-export default function MessageRender({ speaker, data, messageProcessing}) {
+export default function MessageRender({ speaker, data, messageProcessing, stopped}) {
   const isAi = speaker === 'ai';
   const content = data?.message ?? "Loading";
 
@@ -164,7 +164,7 @@ export default function MessageRender({ speaker, data, messageProcessing}) {
   return (
     <div
       className={`message-text ${
-        isAi && messageProcessing ? "processing-status" : ""
+        isAi && messageProcessing || stopped ? "processing-status" : ""
       }`}
     >
       {String(content)}

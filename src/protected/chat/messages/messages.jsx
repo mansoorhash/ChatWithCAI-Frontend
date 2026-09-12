@@ -3,6 +3,7 @@ import MessageRender from "./messageRender";
 import MessageActions from "./messageActions";
 import "./messages.css";
 import { ChevronsDown } from "lucide-react";
+import Attachments from "./components/attachments";
 
 function Messages({
   turns,
@@ -24,39 +25,47 @@ function Messages({
     <>
       {turns.map((t, i) => {
         const aiMessage = t?.ai?.message;
+        const attachments = t?.user?.attachments;
         const messageError = typeof aiMessage === "string" && t?.ai?.error;
-        const processing = messageProcessing && i === turns.length - 1;
+        const processing = (messageProcessing && i === turns.length - 1 ) || attachments;
         return (
-        <React.Fragment key={i}>
+        <React.Fragment key={t.turnSeq}>
           {/* USER MESSAGE */}
           {t?.user?.message && (
-            <div 
-              key={t.turnSeq}
-              id={`turn-${t.turnSeq}`}
-              data-turn={t.turnSeq}
-              className={`chat-msg user ${editedTurn === i ? 'editing-target' : ''}`}
-            >
-              <MessageRender
-                speaker="user"
-                data={t.user}
-              />
-              <MessageActions
-                speaker="user"
-                messageProcessing={messageProcessing}
-                data={t.user}
-                turnIndex={i}
-                sessionId={sessionId}
-                editedTurn={editedTurn}
-                setEditedTurn={setEditedTurn}
-                editValue={editValue}
-                setEditValue={setEditValue}
-              />
-            </div>
+            <>
+              {attachments?.length > 0 && (
+                <div className="chat-msg user attachment-message">
+                  <Attachments files={attachments} />
+                </div>
+              )}
+
+              <div
+                id={`turn-${t.turnSeq}`}
+                data-turn={t.turnSeq}
+                className={`chat-msg user ${editedTurn === i ? 'editing-target' : ''}`}
+              >
+                <MessageRender
+                  speaker="user"
+                  data={t.user}
+                />
+                <MessageActions
+                  speaker="user"
+                  messageProcessing={messageProcessing}
+                  data={t.user}
+                  turnIndex={i}
+                  sessionId={sessionId}
+                  editedTurn={editedTurn}
+                  setEditedTurn={setEditedTurn}
+                  editValue={editValue}
+                  setEditValue={setEditValue}
+                />
+              </div>
+            </>
           )}
 
           {/* AI MESSAGE */}
           {t?.ai?.message? (
-            <div className={`chat-msg ai ai-bubble ${t?.ai?.error ? "error" : null}`}>
+            <div className={`chat-msg ai ai-bubble ${t?.ai?.error ? "error" : null} ${t?.ai?.stopped ? "stopped" : null}`}>
               <MessageRender
                 speaker="ai"
                 data={t.ai}
@@ -116,6 +125,7 @@ function Messages({
                   speaker="ai"
                   data={t.ai}
                   messageProcessing={processing}
+                  
                 />
             </div>
           ) : null}
