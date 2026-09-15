@@ -170,7 +170,7 @@
 .hero-actions {
   opacity: 0;
   transform: translateY(8px);
-  animation: heroButtonFade 0.8s ease 1.5s forwards;
+  animation: heroButtonFade 1.0s ease 1.5s forwards;
 }
 
 @keyframes heroButtonFade {

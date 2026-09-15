@@ -18,29 +18,28 @@
   <a href="https://api.chatwithcai.com/docs">API documentation</a>
 </p>
 
-## Overview
+## About this project
 
-This repository contains the React frontend for **ChatWithCAI (CAI)**, a multi-provider AI chat product. Instead of requiring users to select a model for every request, CAI evaluates each prompt and routes it through the model pool available to that user.
+This directory contains the beta React frontend for **ChatWithCAI (CAI)**. CAI evaluates each prompt and routes it through the model pool available to the user instead of requiring a model choice for every request.
 
-The routing engine and model integrations live in the CAI backend. This frontend provides the product experience around that system: authentication, streamed conversations, session management, model preferences, account controls, usage reporting, and the public-facing website.
+The frontend owns the browser experience: public product pages, authentication, streamed chat, file attachments, conversation history and branches, model preferences, account controls, usage reporting, and subscription views. The backend owns routing decisions, provider integrations, persistence, quotas, and authorization.
 
-CAI is currently in active beta development, so product behavior, model availability, and usage limits may change.
+This project is under active beta development. Product behavior, model availability, plan access, and usage limits may change.
 
-## Highlights
+## Features
 
-- **Automatic model routing** across eligible OpenAI, Anthropic, and Google Gemini models.
-- **Incremental response streaming** from newline-delimited JSON events, including routing status, partial content, final responses, and errors.
-- **Conversation management** with persistent sessions, cursor-based history pagination, automatic titles, renaming, deletion, and responsive navigation.
-- **Message actions** for copying, rating, and regenerating responses.
-- **Model preferences** that let users enable or disable models while respecting plan-level access.
-- **Authentication lifecycle** with protected routes, credentialed requests, in-memory access tokens, serialized refreshes, and automatic request retry after token expiration.
-- **Account and privacy controls** for profile updates, email verification, account deletion, and model-training consent.
-- **Usage and subscription views** with model-level activity summaries and plan availability.
-- **Responsive theming** with light, dark, and system preferences.
-- **Public product pages** for plans, models, status, changelog, FAQ, contact, copyright, privacy, and terms.
-- **Discovery metadata** including a generated sitemap, `robots.txt`, `auth.md`, and a well-known API catalog.
+- Automatic routing across eligible OpenAI, Anthropic, and Google Gemini models.
+- Newline-delimited JSON chat streaming with status, partial, final, and error events.
+- Persistent conversations with cursor-based history, automatic titles, renaming, deletion, message editing, regeneration, continuation, and branch navigation.
+- Direct-to-storage file uploads through backend-issued presigned URLs, with progress and deletion support.
+- Message copying and rating, generation cancellation, and contextual feedback prompts.
+- Protected routes and credentialed authentication using in-memory access tokens, serialized refresh, and one retry after token expiry.
+- Model preferences, profile and email controls, account deletion, model-training consent, usage summaries, and subscription details.
+- Light, dark, and system themes with responsive public and authenticated layouts.
+- Public plans, models, status, changelog, FAQ, contact, support, copyright, privacy, and terms pages.
+- Search and API discovery assets including `sitemap.xml`, `robots.txt`, `auth.md`, and `.well-known/api-catalog`.
 
-## Technology
+## Tech stack
 
 | Area | Technology |
 | --- | --- |
@@ -48,134 +47,133 @@ CAI is currently in active beta development, so product behavior, model availabi
 | Routing | React Router 7 |
 | Markdown | React Markdown, Remark GFM, Rehype Raw |
 | Icons | Lucide React, React Icons |
-| Tooling | Vite 8, ESLint 9 |
-| Testing | Vitest, React Testing Library, Jest DOM |
-| API communication | Fetch API, streamed response readers, cookie credentials, bearer access tokens |
+| Build and lint | Vite 8, ESLint 9 |
+| Tests | Vitest, React Testing Library, Jest DOM |
+| API transport | Fetch API, streamed response readers, XMLHttpRequest for upload progress |
 
-## Application structure
+## Getting started
 
-```text
-src/
-├── api/                    # API client, authentication, chat, and account requests
-├── authentication/         # Login, registration, verification, and password recovery
-├── components/             # Shared layout, feedback, loading, and popup components
-├── protected/
-│   ├── chat/               # Chat state, streaming, messages, and actions
-│   └── sidebar/            # Sessions, settings, subscription, and usage views
-├── public/                 # Marketing, product, status, support, and legal pages
-└── utils/                  # Authentication context, theme context, constants, and helpers
+### Requirements
 
-public/
-├── .well-known/            # API discovery catalog
-├── legal/                  # Privacy policy and terms
-├── provider-logos/         # Provider artwork used by the model catalog
-├── LLMs.json               # Model catalog grouped by plan
-└── auth.md                 # Machine-readable registration and authentication guidance
+- Node.js 22.12 or newer
+- npm
+- A compatible CAI backend for authentication and chat features
 
-scripts/                    # Sitemap and public metadata validation scripts
+### Install and run
+
+```bash
+npm ci
+cp .env.example .env
+npm run dev
 ```
 
-At runtime, the frontend loads its model catalog from `public/LLMs.json` and sends authenticated requests to the configured CAI API. The backend owns routing decisions, provider communication, persistence, quotas, and authorization.
+On Windows PowerShell, replace the copy command with:
 
-## Local development
+```powershell
+Copy-Item .env.example .env
+```
 
-### Prerequisites
+The development server listens on all interfaces and is normally available at `http://localhost:5173`.
 
-- Node.js 22.12 or newer and npm
-- Access to a compatible CAI backend API for authenticated and chat functionality
+Set the API origin in `.env`:
 
-### Setup
+```dotenv
+VITE_BACKEND_SERVER=https://api.example.com
+```
 
-1. Install the locked dependencies:
-
-   ```bash
-   npm ci
-   ```
-
-2. Copy the example environment file:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   On Windows PowerShell, use:
-
-   ```powershell
-   Copy-Item .env.example .env
-   ```
-
-3. Set the backend origin in `.env` if you are not using the default API:
-
-   ```dotenv
-   VITE_BACKEND_SERVER=https://api.example.com
-   ```
-
-4. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-The application opens at `http://localhost:5173` by default. The backend must allow the local frontend origin when credentialed authentication requests are used.
+The value must be an absolute origin without a trailing slash. The backend must allow the development origin when using credentialed requests.
 
 > [!IMPORTANT]
-> Vite embeds every variable prefixed with `VITE_` into the browser bundle. Never place secrets or private credentials in these variables.
+> Vite exposes every `VITE_` variable to browser code. Never store secrets or private credentials in these variables.
 
-## Environment variables
+## Commands
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `VITE_BACKEND_SERVER` | Yes | Absolute origin of the CAI-compatible backend API. Do not include a trailing slash. |
-
-## Available scripts
-
-| Command | Description |
+| Command | Purpose |
 | --- | --- |
-| `npm run dev` / `npm start` | Starts the Vite development server. |
-| `npm test` | Runs the Vitest test suite once. |
-| `npm run test:watch` | Runs Vitest in watch mode. |
-| `npm run lint` | Checks JavaScript, JSX, TypeScript, and TSX source with ESLint. |
-| `npm run build` | Validates public metadata and creates an optimized production build in `build/`. |
-| `npm run preview` | Serves the production build locally for a final check. |
-| `npm run check` | Runs lint, tests, metadata validation, and the production build. |
-| `npm run generate:sitemap` | Rebuilds `public/sitemap.xml` from the public route definitions. |
-| `npm run validate:api-catalog` | Validates `public/.well-known/api-catalog`. |
-| `npm run validate:auth-md` | Checks the required structure of `public/auth.md`. |
+| `npm run dev` | Start Vite in development mode and listen on all interfaces. |
+| `npm start` | Start Vite with its default host behavior. |
+| `npm test` | Run the Vitest suite once. |
+| `npm run test:watch` | Run Vitest in watch mode. |
+| `npm run lint` | Lint JavaScript, JSX, TypeScript, and TSX files with zero warnings allowed. |
+| `npm run build` | Validate public metadata and create an optimized bundle in `build/`. |
+| `npm run preview` | Serve the production bundle locally. |
+| `npm run check` | Run lint, tests, metadata validation, and the production build. |
+| `npm run generate:sitemap` | Regenerate `public/sitemap.xml` from the public route table. |
+| `npm run validate:api-catalog` | Validate `public/.well-known/api-catalog`. |
+| `npm run validate:auth-md` | Validate the required structure of `public/auth.md`. |
 
-The `prebuild` hook runs the sitemap generator and both metadata validators automatically before every production build.
+`npm run build` invokes the sitemap generator and both metadata validators through the `prebuild` hook. If public routes change, commit the regenerated sitemap with the route change.
 
-## Backend integration
+## Project map
 
-The frontend expects a CAI-compatible API that supports:
+```text
+beta/
+├── public/                    # Static, legal, discovery, and model-catalog assets
+├── scripts/                   # Sitemap generation and public metadata validation
+├── src/
+│   ├── api/                   # Backend request modules and token-refresh transport
+│   ├── authentication/        # Login, registration, verification, and recovery
+│   ├── components/            # Shared layout, popup, loading, and status UI
+│   ├── protected/
+│   │   ├── chat/              # Conversation state, streaming, uploads, and messages
+│   │   ├── sidebar/           # Sessions, settings, subscription, and usage
+│   │   └── utils/             # Protected-area helpers
+│   ├── public/                # Public layouts, route definitions, and pages
+│   └── utils/                 # Authentication/theme contexts and constants
+├── index.html                 # Vite HTML entry point
+├── package.json               # Dependencies, commands, and Node requirement
+└── vite.config.mjs            # Build and test configuration
+```
 
-- Account registration, login, verification, password recovery, logout, and session refresh.
-- Credentialed identity checks and short-lived bearer access tokens.
-- Chat session creation, pagination, editing, deletion, and streamed generation.
-- Model preferences, subscription details, usage summaries, message reviews, and data controls.
-- Public service-status responses.
+More detailed notes live beside the areas where they matter:
 
-The production service advertises its OpenAPI description and documentation through [`public/.well-known/api-catalog`](./public/.well-known/api-catalog).
+- [`public/README.md`](./public/README.md) — generated files, discovery metadata, and public asset rules.
+- [`src/api/README.md`](./src/api/README.md) — request layering, authentication, and endpoint modules.
+- [`src/protected/chat/README.md`](./src/protected/chat/README.md) — chat state, streaming, branches, and attachments.
 
-## Production deployment
+At runtime, the frontend reads its plan-grouped model catalog from `public/LLMs.json`. Public URLs are defined in `src/public/publicPageRoutes.jsx`; authentication URLs are defined separately in `src/authentication/authPageRoutes.jsx`.
 
-Create a production bundle with:
+## Backend contract
+
+The frontend expects a CAI-compatible API with:
+
+- Registration, login, verification, password recovery, logout, and token refresh.
+- Cookie-backed credentialed requests and short-lived bearer access tokens.
+- Session creation, cursor pagination, title editing, deletion, branches, and streamed generation.
+- Presigned attachment upload, completion, and deletion endpoints.
+- Model selection, subscription, usage, message review, personal-data, and training-consent endpoints.
+- A public service-status endpoint.
+
+The production API advertises its OpenAPI description, human-readable documentation, and health endpoint through [`public/.well-known/api-catalog`](./public/.well-known/api-catalog).
+
+## Testing and release checks
+
+Run the complete local gate before merging or deploying:
+
+```bash
+npm run check
+```
+
+Tests are colocated with the components or utilities they cover. `src/setupTests.js` installs DOM matchers and browser API shims for the jsdom environment.
+
+## Deployment
+
+Create the production bundle with:
 
 ```bash
 npm run build
 ```
 
-Deploy the generated `build/` directory to a static host. Because the application uses browser-based routing, configure the host to serve `index.html` as the fallback for routes such as `/chat/:id`, `/models`, `/login`, and `/register`.
+Deploy `build/` to a static host. Configure an SPA fallback so unknown browser routes serve `index.html`; direct visits to paths such as `/chat/:id`, `/models`, `/login`, and `/register` otherwise fail at the host layer.
 
-For production authentication, serve the frontend and API over HTTPS and configure the backend's allowed origins and cookie policy for the deployed frontend domain.
+Production authentication requires HTTPS plus backend CORS and cookie settings that allow the deployed frontend origin.
 
-## Project status
+## Support and status
 
-CAI is under active beta development. The public model catalog, plan structure, limits, and individual features are expected to evolve as the routing system is tested.
-
-Bug reports and product questions can be submitted through the [contact page](https://chatwithcai.com/contact) or sent to [support@chatwithcai.com](mailto:support@chatwithcai.com).
+Use the [contact page](https://chatwithcai.com/contact), email [support@chatwithcai.com](mailto:support@chatwithcai.com), or check the [service status](https://chatwithcai.com/status).
 
 ## License
 
 Copyright © 2026 Mansoor Hashemi, operating as ChatWithCAI. All Rights Reserved.
 
-This repository is publicly viewable but proprietary; it is not an open-source project. See the [proprietary software notice](./LICENSE) for the permissions and restrictions that apply.
+This repository is publicly viewable but proprietary; it is not an open-source project. See the [proprietary software notice](./LICENSE) for the applicable permissions and restrictions.

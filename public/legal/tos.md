@@ -1,5 +1,5 @@
 # TERMS OF SERVICE
-**Last updated August 16, 2026**
+**Last updated September 12, 2026**
 
 
 AGREEMENT TO OUR LEGAL TERMS
@@ -68,9 +68,13 @@ You retain any intellectual property rights you hold in prompts, messages, code,
 
 By submitting User Content, you grant us a non-exclusive, worldwide, royalty-free license, sublicensable solely to service providers acting on our behalf, to store, host, reproduce, transmit, format, and otherwise process your User Content as technically necessary to operate, provide, maintain, secure, and administer the Services. This license continues while the User Content is retained in accordance with our Privacy Policy.
 
-When you enable the optional training setting, and only to the extent you hold the necessary rights, you grant us an additional non-exclusive, worldwide, royalty-free license, sublicensable solely to service providers acting on our behalf, to reproduce, analyze, adapt, and use eligible non-sensitive User Content to develop, train, test, evaluate, and improve CAI models.
+When you enable the optional training setting, and only to the extent you hold the necessary rights, you grant us an additional non-exclusive, worldwide, royalty-free license, sublicensable solely to service providers acting on our behalf, to reproduce, analyze, adapt, and use eligible non-sensitive User Content, excluding uploaded files and their extracted contents, to develop, train, test, evaluate, and improve CAI models.
 
-We may select and use User Content for training only while the training setting is enabled. Disabling the setting stops future selection and use of your User Content for new training activities, but does not undo training already completed or require models already trained to be retrained or altered.
+Uploaded files and their extracted contents are not used to train CAI models, regardless of whether the optional training setting is enabled.
+
+We may select and use eligible User Content, excluding uploaded files and their extracted contents, for training only while the training setting is enabled. Disabling the setting stops future selection and use of eligible User Content for new training activities, but does not undo training already completed or require models already trained to be retrained or altered.
+
+You must not upload files or other content that you do not have the legal right to possess, use, disclose, or submit to the Services, including files containing confidential, proprietary, personal, or third-party information that you are not authorized to provide.
 
 AI-generated responses. Subject to these Legal Terms, applicable law, and third-party rights, you may use AI-generated responses produced for you. To the extent CAI acquires any intellectual property rights in a response generated specifically for you, CAI assigns those rights to you. AI-generated responses may not be unique, and other users may receive identical or similar responses. A response may not qualify for copyright or other intellectual-property protection, and you are responsible for ensuring that your use does not violate applicable law or another person's rights.
 
@@ -243,6 +247,8 @@ You agree to defend, indemnify, and hold us and our agents harmless from and aga
 <a id="user-data"></a>
 ## 17. USER DATA
 We will maintain certain data that you transmit to the Services for the purpose of operating and managing the performance of the Services, as well as data relating to your use of the Services. Although we perform routine backups of data, you are responsible for maintaining separate copies of any User Content you wish to preserve. We do not guarantee that lost or corrupted data can always be recovered. Any liability arising from the loss or corruption of data is subject to Section 15 and applicable law.
+
+The Services are not intended to function as a permanent file-storage, backup, or document-management service. Uploaded files may become unavailable as a result of deletion, expiration, account changes, feature changes, system maintenance, or other operational reasons. You should maintain independent copies of any files you wish to preserve.
 
 <a id="electronic-communications-records-and-signatures"></a>
 ## 18. ELECTRONIC COMMUNICATIONS, RECORDS, AND SIGNATURES

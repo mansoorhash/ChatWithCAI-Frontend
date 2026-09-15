@@ -60,8 +60,8 @@ export default function Home() {
             </h1>
             <p>
               <FadeIn
-                text="Never have to choose between models again."
-                delay={1.1}
+                text="Why choose one when you can have them all."
+                delay={1.3}
               />
             </p>
           </div>

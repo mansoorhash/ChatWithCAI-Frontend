@@ -19,6 +19,7 @@ import {
 import { useUserID } from '../../../utils/userIdContext';
 import './layout.css';
 import './attachments.css'
+import { pingChatMessage } from '../../../api/chat/message';
 
 const CHAT_MESSAGE_LIMIT = 20;
 const CHAT_LIMIT_REMINDER_THRESHOLD = 8;
@@ -101,6 +102,8 @@ function ChatInput({
 
     const attachmentRef = useRef(null);
     const fileInputRef = useRef(null);
+    const pingedServer = useRef(false);
+    const pingTimeoutRef = useRef(null);
 
     useEffect(() => {
     if (!showAttachment) return undefined;
@@ -133,12 +136,18 @@ function ChatInput({
     }, [showAttachment]);
 
     useEffect(() => {
-    setShowAttachment(false);
+        setShowAttachment(false);
     }, [sessionId]);
 
     useEffect(() => {
         setInput('');
     }, [sessionId]);
+
+    useEffect(() => {
+        return () => {
+            if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
+        };
+    }, []);
 
     useEffect(() => {
         if (editedTurn === null) return undefined;
@@ -401,8 +410,52 @@ function ChatInput({
         );
     };
 
+    const handleInputChange = (event) => {
+        const value = event.target.value;
+
+        if (editedTurn !== null) {
+            setEditValue(value);
+            return;
+        }
+
+        setInput(value);
+
+        if (value.trim()) {
+            void handlePingServer();
+        }
+    };
+
+    const handlePingServer = async () => {
+        if (showTrainingChoice) return;
+        if (messagesRemaining <= 0) return;
+        if (pingedServer.current) return;
+
+        pingedServer.current = true;
+
+        try {
+            await pingChatMessage({
+                accessToken,
+                updateAccessToken,
+            });
+
+            pingTimeoutRef.current = setTimeout(() => {
+                pingedServer.current = false;
+                pingTimeoutRef.current = null;
+            }, 5000);
+        } catch {
+            pingedServer.current = false;
+        }
+    };
+
+
     return (
-        <div className="chat-input-wrapper" ref={wrapperRef}>
+        <div 
+            className="chat-input-wrapper" 
+            ref={wrapperRef}
+            onPointerEnter={() => {
+                void handlePingServer();
+            }}
+        >
         {!showTrainingChoice && showMessageReminder && (
             <div
             className={`chat-limit-status ${
@@ -588,21 +641,17 @@ function ChatInput({
                     )}
                 </div>
                 <textarea
-                ref={inputRef}
-                className="chat-input scrollbar-custom"
-                value={activeText}
-                onKeyDown={handleKeyDown}
-                onChange={(event) =>
-                    editedTurn !== null
-                    ? setEditValue(event.target.value)
-                    : setInput(event.target.value)
-                }
-                rows={1}
-                placeholder={
-                    hasSelectedSession
-                    ? 'How can I help...'
-                    : 'What shall we work on today?'
-                }
+                    ref={inputRef}
+                    className="chat-input scrollbar-custom"
+                    value={activeText}
+                    onKeyDown={handleKeyDown}
+                    onChange={handleInputChange}
+                    rows={1}
+                    placeholder={
+                        hasSelectedSession
+                        ? 'How can I help...'
+                        : 'What shall we work on today?'
+                    }
                 />
                 <div className="chat-input-actions">
                 {messageLoading ? (

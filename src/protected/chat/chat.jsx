@@ -102,7 +102,7 @@ export default function Chat({
   const hasTurns = turns.length > 0;
   const showTurnNavigator = turns.length > 2;
   
-  const hasSelectedSession = Boolean(turns.length);
+  const hasSelectedSession = Boolean(!session?.draft);
 
   // Message States
   const [activeTurn, setActiveTurn] = useState(null);

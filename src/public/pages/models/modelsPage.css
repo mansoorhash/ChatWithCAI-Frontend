@@ -61,7 +61,7 @@
 }
 
 .model-provider-dropdown:hover {
-  border-color: var(--border-2);
+  border-color: var(--accent-hover);
 }
 
 .model-provider-summary:focus-visible {

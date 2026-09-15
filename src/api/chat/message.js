@@ -95,3 +95,14 @@ export async function continueChatMessageServer(
     throw err;
   }
 }
+
+export async function pingChatMessage({accessToken, updateAccessToken}){
+  return await apiFetch(
+    `/ping/chat`,
+    {
+      method: "POST",
+    },
+    accessToken,
+    updateAccessToken
+  )
+}

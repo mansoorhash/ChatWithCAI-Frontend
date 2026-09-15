@@ -4,6 +4,32 @@ import './changelogPage.css';
 
 const releases = [
   {
+    version: 'v0.7.0',
+    date: 'September 11, 2026',
+    dateTime: '2026-09-11',
+    title: 'File Attachments in Chat',
+    summary: 'Attach files to a conversation and follow their upload status before sending a message.',
+    changes: [
+      'Added file selection and uploads through backend-issued storage links, with progress shown in the composer.',
+      'Added clear ready, uploading, removing, and failed states for attachments; files can also be removed from a draft message.',
+      'Displayed attached files alongside sent messages, including their names and file types.',
+      'Blocked message submission while attachments are uploading or being removed, and improved feedback for upload failures and oversized files.',
+    ],
+  },
+  {
+    version: '0.6.2',
+    date: 'September 2, 2026',
+    dateTime: '2026-09-02',
+    title: 'Conversation Navigation and Editing',
+    summary: 'Longer conversations are easier to navigate, revise, and recover after an interrupted connection.',
+    changes: [
+      'Added a turn navigator for longer conversations so you can jump to a specific exchange.',
+      'Added editing for earlier user messages and improved controls for choosing regenerated answers.',
+      'Restored a saved answer when its stream ends early instead of showing a false failure.',
+      'Updated message-limit and reset-time information as chat responses arrive.',
+    ],
+  },
+  {
     version: 'v0.6.1',
     date: 'August 24, 2026',
     title: 'Usage and Model Catalog Fixes',
@@ -96,10 +122,10 @@ export default function ChangelogPage() {
 
       <section className="changelog-list" aria-label="CAI releases">
         {releases.map((release) => (
-          <article className="changelog-release" key={release.version}>
+          <article className="changelog-release" key={release.dateTime || release.version}>
             <aside>
               <span className="changelog-version">{release.version}</span>
-              <time>{release.date}</time>
+              <time dateTime={release.dateTime}>{release.date}</time>
             </aside>
 
             <div className="changelog-release-content">

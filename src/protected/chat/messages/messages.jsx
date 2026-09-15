@@ -27,7 +27,7 @@ function Messages({
         const aiMessage = t?.ai?.message;
         const attachments = t?.user?.attachments;
         const messageError = typeof aiMessage === "string" && t?.ai?.error;
-        const processing = (messageProcessing && i === turns.length - 1 ) || attachments;
+        const processing = (messageProcessing && i === turns.length - 1 ) || (!aiMessage && attachments);
         return (
         <React.Fragment key={t.turnSeq}>
           {/* USER MESSAGE */}
