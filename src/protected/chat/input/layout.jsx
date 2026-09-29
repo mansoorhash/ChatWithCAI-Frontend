@@ -441,7 +441,7 @@ function ChatInput({
             pingTimeoutRef.current = setTimeout(() => {
                 pingedServer.current = false;
                 pingTimeoutRef.current = null;
-            }, 5000);
+            }, 20000);
         } catch {
             pingedServer.current = false;
         }

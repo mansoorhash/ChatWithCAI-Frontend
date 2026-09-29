@@ -305,7 +305,9 @@ export default function Chat({
       !session?.id
     ) return;
     setFeedbackPromptTurnSeq(null);
-
+    
+    setEditedTurn(null);
+    setEditValue('');
     const requestController = new AbortController();
     messageAbortRef.current = requestController;
     messageReaderRef.current = null;
@@ -989,7 +991,7 @@ export default function Chat({
 
   return (
     <div className="chat-container">
-      {hasSelectedSession &&
+      {chatLoading || hasSelectedSession &&
         <ChatHeader session={session} chatLoading={chatLoading} />
       }
       <div className={`chat-main ${hasSelectedSession ? "" : "no-session"}`}>

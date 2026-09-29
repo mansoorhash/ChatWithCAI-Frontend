@@ -4,6 +4,20 @@ import './changelogPage.css';
 
 const releases = [
   {
+    version: 'v0.7.1',
+    date: 'September 15, 2026',
+    dateTime: '2026-09-15',
+    title: 'Attachment Processing and Chat Responsiveness',
+    summary: 'Uploaded documents now flow securely into conversations, with faster starts and clearer privacy protections.',
+    changes: [
+      'Added support for PDF, DOCX, TXT, and Markdown attachments up to 20 MB, with validation before processing.',
+      'Made uploaded document content available to the selected model and kept attachments with their conversation after a message is sent.',
+      'Reduced delays at the start of a request by preparing the chat service as you begin composing a message.',
+      'Kept the conversation navigator focused on the newest turns as a chat grows.',
+      'Updated the Privacy Policy and Terms of Service to explain file handling, retention, and that uploaded files are excluded from CAI model training.',
+    ],
+  },
+  {
     version: 'v0.7.0',
     date: 'September 11, 2026',
     dateTime: '2026-09-11',

@@ -107,6 +107,7 @@ export function UserIdProvider({ children }) {
       }
     } catch (err) {
       console.error("Token refresh failed in context:", err);
+      handleLogout();
     }
   }, [updateAccessToken]);
 
