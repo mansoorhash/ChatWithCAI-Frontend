@@ -277,6 +277,38 @@ describe('chat message sending', () => {
     expect(await screen.findByText('Answer to edited question')).toBeInTheDocument();
   });
 
+  test('cancels editing without sending the edited message', async () => {
+    render(
+      <MemoryRouter>
+        <Chat
+          setSuccessMessage={vi.fn()}
+          setErrorMessage={vi.fn()}
+          session={session}
+          setSessions={vi.fn()}
+          skipPageFetch={false}
+          setSkipPageFetch={vi.fn()}
+          newChat={false}
+          sessionId={session.id}
+          catalogDict={{}}
+          trainingState={false}
+          setTrainingState={vi.fn()}
+          modelLabelsById={{}}
+        />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Earlier answer');
+    fireEvent.click(screen.getByText('Edit').closest('button'));
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Do not send this edit' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel edit' }));
+
+    expect(apiMocks.sendChatTurnServer).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Cancel edit' })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveValue('');
+  });
+
   test('synchronizes manually edited or deleted chat-limit storage', async () => {
     const oneHourFromNow = Math.floor(Date.now() / 1000) + 60 * 60;
     window.localStorage.setItem(CHAT_TOTALCOUNT, '13');

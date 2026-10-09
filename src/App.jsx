@@ -84,16 +84,7 @@ export default function App() {
                 <Route path="*" element={<NotFoundPage/>}/>
               </Route>
               <Route
-                path="/chat"
-                element={
-                  <ProtectedRoute>
-                    <ChatLayout />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/chat/:id"
+                path="/chat/:id?"
                 element={
                   <ProtectedRoute>
                     <ChatLayout />

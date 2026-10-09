@@ -4,6 +4,16 @@ import './changelogPage.css';
 
 const releases = [
   {
+    version: 'v0.7.1.1-v0.7.1.3',
+    date: 'September 29, 2026',
+    title: 'Chat and Session Reliability',
+    summary: 'Security Fixes and UI Quality of Life',
+    changes: [
+      'Improved login security reliability.',
+      'Added cancel button for edits.',
+    ],
+  },
+  {
     version: 'v0.7.1',
     date: 'September 15, 2026',
     dateTime: '2026-09-15',

@@ -206,6 +206,11 @@ function ChatInput({
         onSendMessage(message);
     };
 
+    const cancelEdit = () => {
+        setEditedTurn(null);
+        setEditValue('');
+    };
+
     const handleKeyDown = (event) => {
         if (event.key !== 'Enter' || event.shiftKey) return;
         event.preventDefault();
@@ -670,6 +675,17 @@ function ChatInput({
                     <span className="chat-send-text">Stop</span>
                     </button>
                 ) : (
+                    <>
+                    {editedTurn !== null &&
+                        <button
+                            type="button"
+                            className="chat-cancel"
+                            onClick={cancelEdit}
+                            aria-label="Cancel edit"
+                        >
+                        Cancel
+                        </button>
+                    }
                     <button
                     type="button"
                     className="chat-send"
@@ -680,6 +696,7 @@ function ChatInput({
                     <ArrowUp size={18} strokeWidth={2.5} aria-hidden="true" />
                     <span className="chat-send-text">Send</span>
                     </button>
+                    </>
                 )}
                 </div>
             </div>
